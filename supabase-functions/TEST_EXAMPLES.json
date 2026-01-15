@@ -1,0 +1,216 @@
+// ============================================================================
+// EDGE FUNCTION TEST EXAMPLES
+// Copy these into your testing tool (Postman, Thunder Client, etc.)
+// ============================================================================
+
+// URL: https://YOUR_PROJECT_REF.supabase.co/functions/v1/calculate-project
+// Headers:
+// - Content-Type: application/json
+// - Authorization: Bearer YOUR_ANON_KEY
+
+// ----------------------------------------------------------------------------
+// TEST 1: Electrical Calculation (Mixed Single & Three-Phase)
+// ----------------------------------------------------------------------------
+{
+  "action": "electrical",
+  "inputs": [
+    {
+      "type": "Socket 插座",
+      "phase": "1",
+      "qty": 6,
+      "power": 1000,
+      "unit": "W",
+      "length": 15
+    },
+    {
+      "type": "Lighting 照明燈",
+      "phase": "1",
+      "qty": 20,
+      "power": 18,
+      "unit": "W",
+      "length": 25
+    },
+    {
+      "type": "Split-type AC 分體式空調",
+      "phase": "1",
+      "qty": 2,
+      "power": 1.5,
+      "unit": "HP",
+      "length": 20
+    },
+    {
+      "type": "VRV Outdoor Unit 室外機",
+      "phase": "3",
+      "qty": 1,
+      "power": 15,
+      "unit": "HP",
+      "length": 30
+    }
+  ]
+}
+
+// Expected Response Structure:
+// {
+//   "success": true,
+//   "data": {
+//     "rows": [
+//       {
+//         "circuitNo": "C1",
+//         "name": "Socket 插座 #1",
+//         "assignedPhase": "L1",
+//         "breaker": 16,
+//         "protectionType": "RCD+MCB/RCBO\nType C",
+//         "cable": "R3x2.5",
+//         "vd": 1.25,
+//         "Pinst": 3.53,
+//         "df": 0.7,
+//         "Psim": 2.47,
+//         "is3Phase": false
+//       },
+//       // ... more circuits
+//     ],
+//     "totalKva": 21.45,
+//     "phaseBalance": {
+//       "L1": 7.15,
+//       "L2": 7.15,
+//       "L3": 7.15
+//     },
+//     "mainSwitch": "32A TP",
+//     "meter": "3-Ph Meter (20.7 kVA)",
+//     "serviceBreaker": "3x32 (A)",
+//     "meterKva": 20.7
+//   }
+// }
+
+// ----------------------------------------------------------------------------
+// TEST 2: HVAC Calculation (Multiple Space Types)
+// ----------------------------------------------------------------------------
+{
+  "action": "hvac",
+  "items": [
+    {
+      "key": "office",
+      "area": 50,
+      "height": 3.0,
+      "people": 8
+    },
+    {
+      "key": "meeting",
+      "area": 25,
+      "height": 2.8,
+      "people": 12
+    },
+    {
+      "key": "pantry",
+      "area": 15,
+      "height": 3.0,
+      "people": 3
+    },
+    {
+      "key": "toilet",
+      "area": 8,
+      "height": 2.6,
+      "people": 0
+    }
+  ]
+}
+
+// Expected Response Structure:
+// {
+//   "success": true,
+//   "data": [
+//     {
+//       "id": 1704891234567,
+//       "key": "office",
+//       "label": "Office (辦公室)",
+//       "area": 50,
+//       "height": 3.0,
+//       "people": 8,
+//       "coolingHP": 4.0,
+//       "coolingHPDisplay": "4.0 HP",
+//       "requiresFreshAir": true,
+//       "requiresExhaust": false,
+//       "freshAirDisplay": "YES / 是",
+//       "exhaustDisplay": "NO / 否"
+//     },
+//     // ... more spaces
+//   ]
+// }
+
+// ----------------------------------------------------------------------------
+// TEST 3: Get Space Types (for Dropdown Population)
+// ----------------------------------------------------------------------------
+{
+  "action": "get_space_types"
+}
+
+// Expected Response:
+// {
+//   "success": true,
+//   "data": [
+//     { "key": "office", "label": "Office (辦公室)" },
+//     { "key": "meeting", "label": "Meeting Room (會議室)" },
+//     { "key": "pantry", "label": "Pantry (茶水間)" },
+//     // ... all space types
+//   ]
+// }
+
+// ----------------------------------------------------------------------------
+// TEST 4: Error Handling - Invalid Action
+// ----------------------------------------------------------------------------
+{
+  "action": "invalid_action"
+}
+
+// Expected Response:
+// {
+//   "success": false,
+//   "error": "Unknown action: invalid_action. Use 'electrical' or 'hvac'."
+// }
+
+// ----------------------------------------------------------------------------
+// TEST 5: Error Handling - Empty Inputs
+// ----------------------------------------------------------------------------
+{
+  "action": "electrical",
+  "inputs": []
+}
+
+// Expected Response:
+// {
+//   "success": false,
+//   "error": "Invalid inputs: must be a non-empty array"
+// }
+
+// ----------------------------------------------------------------------------
+// TEST 6: Complex Electrical (High Power Equipment)
+// ----------------------------------------------------------------------------
+{
+  "action": "electrical",
+  "inputs": [
+    {
+      "type": "EV Charger 充電樁",
+      "phase": "3",
+      "qty": 1,
+      "power": 22,
+      "unit": "kW",
+      "length": 50
+    },
+    {
+      "type": "Electric Water Heater 電熱水爐",
+      "phase": "1",
+      "qty": 1,
+      "power": 8000,
+      "unit": "W",
+      "length": 35
+    },
+    {
+      "type": "Kitchen Equipment 廚房設備",
+      "phase": "3",
+      "qty": 1,
+      "power": 15000,
+      "unit": "W",
+      "length": 40
+    }
+  ]
+}

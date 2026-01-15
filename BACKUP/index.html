@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RenoEasy Calc - 裝修易機電核算系統</title>
+    
+    <!-- External CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #0044cc;
+            --primary-hover: #0033aa;
+            --secondary-color: #6c757d;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --gunmetal: #2C3539;
+            --gunmetal-light: #3D464A;
+            --bg-light: #f8f9fa;
+            --bg-white: #ffffff;
+            --border-color: #dee2e6;
+            --text-dark: #212529;
+            --text-muted: #6c757d;
+            --shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: 'Noto Sans TC', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-light);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        /* Navigation */
+        .navbar {
+            background: var(--bg-white);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .nav-logo img {
+            height: 50px;
+            width: auto;
+        }
+
+        /* Buttons */
+        button {
+            border: none;
+            border-radius: 8px;
+            padding: 0.7rem 1.5rem;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,68,204,0.3);
+        }
+
+        .btn-secondary {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-delete {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        /* SaaS Style Premium Button */
+        .btn-premium {
+            background: linear-gradient(135deg, var(--gunmetal) 0%, var(--gunmetal-light) 100%);
+            color: #ffffff;
+            font-size: 1.2rem;
+            padding: 1.2rem 3rem;
+            font-weight: 600;
+            border-radius: 12px;
+            box-shadow: 
+                0 4px 15px rgba(44, 53, 57, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-premium::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.1), 
+                transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-premium:hover::before {
+            left: 100%;
+        }
+
+        .btn-premium:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 
+                0 8px 25px rgba(44, 53, 57, 0.5),
+                0 0 20px rgba(255, 255, 255, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-premium:active {
+            transform: translateY(-1px) scale(0.98);
+        }
+
+        /* Page System */
+        .page {
+            display: none;
+            min-height: calc(100vh - 70px);
+            padding: 2rem;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Landing Page */
+        .landing-hero {
+            max-width: 600px;
+            margin: 4rem auto;
+            text-align: center;
+        }
+
+        .hero-logo {
+            width: 150px;
+            margin-bottom: 2rem;
+        }
+
+        .landing-hero h1 {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .login-box {
+            background: var(--bg-white);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+
+        .login-box input {
+            width: 100%;
+            padding: 0.8rem;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        .login-note {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        /* Dashboard */
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .project-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .project-card {
+            background: var(--bg-white);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s;
+        }
+
+        .project-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+
+        .project-card h3 {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .project-card button {
+            margin-top: 1rem;
+            margin-right: 0.5rem;
+        }
+
+        /* Workspace */
+        .workspace-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding-bottom: 200px;
+        }
+
+        .section-box {
+            background: var(--bg-white);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        .section-box h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        /* Load List */
+        .load-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .load-item {
+            display: grid;
+            grid-template-columns: 3fr auto;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--bg-light);
+            border-radius: 8px;
+            align-items: center;
+        }
+
+        .load-info strong {
+            display: block;
+            margin-bottom: 0.3rem;
+        }
+
+        .load-info span {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Sticky Input Bar */
+        .sticky-input-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-white);
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.1);
+            padding: 1rem 2rem;
+            display: flex;
+            gap: 1rem;
+            overflow-x: auto;
+            z-index: 999;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            min-width: 150px;
+        }
+
+        .input-group label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 0.3rem;
+            text-align: center;
+        }
+
+        .input-group input,
+        .input-group select {
+            padding: 0.6rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        .unit-display {
+            padding: 0.6rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            text-align: center;
+            background: var(--bg-light);
+            font-weight: bold;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .action-bar {
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .btn-calculate {
+            background: var(--success-color);
+            color: white;
+            font-size: 1.1rem;
+            padding: 0.8rem 2rem;
+        }
+
+        .btn-calculate:hover {
+            background: #218838;
+            transform: scale(1.05);
+        }
+
+        /* Result Page */
+        .result-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .result-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .summary-item {
+            background: var(--bg-white);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .summary-item label {
+            display: block;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .summary-item .value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .warning-box i {
+            color: #ffc107;
+            font-size: 2rem;
+        }
+
+        /* Preview Table */
+        .preview-table-container {
+            overflow-x: auto;
+            margin-top: 1rem;
+        }
+
+        .preview-table {
+            min-width: 100%;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .preview-table-header,
+        .preview-table-row {
+            display: grid;
+            grid-template-columns: 
+                minmax(80px, 1fr)    
+                minmax(200px, 2fr)   
+                minmax(80px, 1fr)    
+                minmax(100px, 1fr)   
+                minmax(150px, 1.5fr) 
+                minmax(120px, 1.2fr) 
+                minmax(100px, 1fr)   
+                minmax(120px, 1.2fr) 
+                minmax(100px, 1fr)   
+                minmax(120px, 1.2fr);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .preview-table-header {
+            background: var(--primary-color);
+            color: white;
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+
+        .preview-table-header > div,
+        .preview-table-row > div {
+            padding: 0.8rem 0.5rem;
+            text-align: center;
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            word-wrap: break-word;
+            hyphens: auto;
+        }
+
+        .preview-table-header > div:last-child,
+        .preview-table-row > div:last-child {
+            border-right: none;
+        }
+
+        .preview-table-row {
+            background: var(--bg-white);
+        }
+
+        .preview-table-row:hover {
+            background: var(--bg-light);
+        }
+
+        /* 模糊效果 - Column 5~10 */
+        .blur-text > div:nth-child(n+5) {
+            filter: blur(4px);
+            user-select: none;
+            pointer-events: none;
+        }
+
+        .note {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Premium Card */
+        .premium-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(102,126,234,0.3);
+            margin-top: 3rem;
+        }
+
+        .premium-content {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .premium-content h3 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .premium-content ul {
+            list-style: none;
+            margin-bottom: 2rem;
+            text-align: left;
+            display: inline-block;
+        }
+
+        .premium-content ul li {
+            padding: 0.5rem 0;
+            font-size: 1.05rem;
+        }
+
+        .premium-price {
+            margin-bottom: 2rem;
+        }
+
+        .premium-price .price {
+            font-size: 3rem;
+            font-weight: bold;
+            display: block;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sticky-input-bar {
+                flex-wrap: wrap;
+            }
+            
+            .input-group {
+                min-width: 45%;
+            }
+            
+            .preview-table-header,
+            .preview-table-row {
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <img src="LOGO.png" alt="RenoEasy Logo" onerror="this.style.display='none'">
+                <span>RenoEasy Calc</span>
+            </div>
+            <div id="nav-auth-area">
+                <button onclick="RenoApp.showLogin()" class="btn-primary">登入 Login</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page: Landing -->
+    <div id="page-landing" class="page active">
+        <div class="landing-hero">
+            <img src="LOGO.png" alt="Logo" class="hero-logo" onerror="this.style.display='none'">
+            <h1>RenoEasy Calc</h1>
+            <p>專注小型裝修工程 (&lt; 69kVA) 的機電設計與核算工具</p>
+            
+            <div class="login-box">
+                <h3>快速登入</h3>
+                <input type="tel" id="login-id" placeholder="請輸入電話號碼" maxlength="15">
+                <button onclick="RenoApp.doLogin()" class="btn-primary">立即登入</button>
+                <p class="login-note">測試階段:輸入任意號碼即可</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page: Dashboard -->
+    <div id="page-dashboard" class="page">
+        <div class="dashboard-container">
+            <div class="dashboard-header">
+                <h2>我的專案</h2>
+                <button onclick="RenoApp.createNewProject()" class="btn-primary">
+                    <i class="fas fa-plus"></i> 新建專案
+                </button>
+            </div>
+            <div id="project-list" class="project-list"></div>
+        </div>
+    </div>
+
+    <!-- Page: Workspace -->
+    <div id="page-workspace" class="page">
+        <div class="workspace-container">
+            <div style="display:flex; align-items:center; gap:1rem; margin-bottom:2rem;">
+                <button onclick="RenoApp.backToDashboard()" class="btn-secondary">
+                    <i class="fas fa-arrow-left"></i> 返回
+                </button>
+                <h2 id="workspace-project-name"></h2>
+            </div>
+
+            <div class="section-box">
+                <h3>已添加設備 Added Loads</h3>
+                <div id="added-items-list" class="load-list"></div>
+            </div>
+
+            <div class="sticky-input-bar">
+                <div class="input-group">
+                    <label>Load Description<br>用電設備</label>
+                    <select id="in-type" onchange="RenoApp.handleDeviceChange()">
+                        <option value="">選擇設備類型</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label>Quantity<br>設備數量</label>
+                    <input type="number" id="in-qty" min="1" placeholder="數量" oninput="RenoApp.checkInput()">
+                </div>
+
+                <div class="input-group">
+                    <label>Power<br>功率</label>
+                    <input type="number" id="in-power" step="0.1" placeholder="數值" oninput="RenoApp.checkInput()">
+                </div>
+
+                <div class="input-group">
+                    <label>Unit<br>單位</label>
+                    <div id="in-unit-display" class="unit-display">W</div>
+                </div>
+
+                <div class="input-group">
+                    <label>Cable Length<br>電纜長度(m)</label>
+                    <input type="number" id="in-len" min="1" value="20">
+                </div>
+
+                <div class="input-group">
+                    <button id="btn-add-item" onclick="RenoApp.addItem()" disabled>
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="action-bar">
+                <button onclick="RenoApp.calculateResult()" class="btn-calculate">
+                    <i class="fas fa-calculator"></i> 開始核算 Calculate
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page: Result -->
+    <div id="page-result" class="page">
+        <div class="result-container">
+            <div style="display:flex; align-items:center; gap:1rem; margin-bottom:2rem;">
+                <button onclick="RenoApp.showPage('page-workspace')" class="btn-secondary">
+                    <i class="fas fa-arrow-left"></i> 返回編輯
+                </button>
+                <h2>核算結果 Calculation Result</h2>
+            </div>
+
+            <div class="result-summary">
+                <div class="summary-item">
+                    <label>Sum. Demand 最高總需量</label>
+                    <div class="value" id="res-demand">--</div>
+                </div>
+                <div class="summary-item">
+                    <label>建議電錶 Recommended Meter</label>
+                    <div class="value" id="res-meter">--</div>
+                </div>
+            </div>
+
+            <div id="res-warning" class="warning-box hidden">
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>超出業務範圍！</strong>
+                本系統專注於小型裝修工程 (&lt; 69kVA)。您的專案需求超過此範圍，建議諮詢註冊工程師。
+            </div>
+
+            <div class="section-box">
+                <h3>Load Schedule 負載表預覽</h3>
+                <p class="note">詳細數據已模糊處理,請購買完整報告以查看。</p>
+                
+                <div class="preview-table-container">
+                    <div class="preview-table">
+                        <div class="preview-table-header">
+                            <div>Circuit No.<br>迴路編號</div>
+                            <div>Description<br>用途</div>
+                            <div>Phase<br>相位</div>
+                            <div>Breaker<br>保護器</div>
+                            <div>Protection Type<br>保護類型</div>
+                            <div>Cable Size<br>線徑(mm²)</div>
+                            <div>Voltage Drop<br>電壓降</div>
+                            <div>Pinst<br>安裝功率(kVA)</div>
+                            <div>DF<br>同時係數</div>
+                            <div>Psim<br>最高總需量(kVA)</div>
+                        </div>
+                        
+                        <div id="result-preview-rows"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="premium-card">
+                <div class="premium-content">
+                    <h3>🔓 解鎖完整專業報告</h3>
+                    <p>獲取包含所有詳細計算、三相平衡圖、CEM 標準匹配的 <strong>單線圖 (Single Line) 格式 PDF</strong></p>
+                    <ul>
+                        <li>✅ 完整 10 欄表格數據</li>
+                        <li>✅ 三相平衡圓餅圖</li>
+                        <li>✅ 符合澳門 CEM 標準</li>
+                    </ul>
+                    <div class="premium-price">
+                        <span class="price">MOP 288</span>
+                        <span class="price-note">限時優惠</span>
+                    </div>
+                    <button onclick="RenoApp.unlockPremium()" class="btn-premium">
+                        立即購買 Purchase Now
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="engine.js"></script>
+    <script src="app.js"></script>
+
+</body>
+</html>

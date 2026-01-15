@@ -1,0 +1,505 @@
+<!-- encoding: utf-8 -->
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RenoEasy Calc - 裝修易機電核算系統</title>
+    
+    <!-- External CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <!-- Main Style -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <img src="LOGO.png" alt="RenoEasy Logo" onerror="this.style.display='none'">
+                <span>RenoEasy Calc</span>
+            </div>
+            
+            <div class="nav-links" id="landing-nav-links">
+                <a href="#features">服務介紹</a>
+                <a href="#">入則服務</a>
+                <a href="#">收費標準</a>
+            </div>
+
+            <div id="nav-auth-area">
+                <button onclick="RenoApp.showLogin()" class="btn btn-primary">登入 Login</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page: Landing -->
+
+    <div id="page-landing" class="page active" style="padding: 0;">
+        
+        <div class="landing-layout">
+            <aside class="landing-sidebar">
+                <div class="sidebar-header">
+                    <h1 class="sidebar-brand" style="margin-top: 1rem;">RenoEasy <span style="color:var(--text-light); font-weight:300;">Calc</span></h1>
+                    <div class="sidebar-tagline">裝修易機電系統計算服務</div>
+                </div>
+
+                <nav class="sidebar-nav">
+                    <a href="#hero" class="nav-item active"><i class="fas fa-home"></i> 首頁 Home</a>
+                    <a href="#features" class="nav-item"><i class="fas fa-list-alt"></i> 服務介紹 Services</a>
+                    <a href="#pricing" class="nav-item"><i class="fas fa-file-signature"></i> 入則服務 Services</a>
+                    <a href="#pricing" class="nav-item"><i class="fas fa-tags"></i> 收費標準 Pricing</a>
+                    <a href="#contact" class="nav-item"><i class="fas fa-envelope"></i> 聯絡我們 Contact</a>
+                </nav>
+
+                <div class="sidebar-footer">
+                    <div class="status-indicator">
+                        <span class="dot online"></span> 系統運作中
+                    </div>
+                    <p>&copy; 2026 RenoEasy Calc.</p>
+                </div>
+            </aside>
+
+            <main class="landing-main">
+                
+                <div style="display: flex; justify-content: flex-end; padding: 1rem 2rem; background: white; border-bottom: 1px solid #e2e8f0;">
+                     <button onclick="const input = document.getElementById('login-id'); if(input.value.trim()) { RenoApp.doLogin(); } else { input.focus(); }" class="btn btn-primary">登入 Login</button>
+                </div>
+
+                <section id="hero" class="hero-section-split">
+                    <div class="hero-text-area">
+                        <h2 class="hero-title-split">
+                            澳門小型装修工程機電設計<br>
+                            <span class="highlight-text">標準化解決方案</span>
+                        </h2>
+                        <p class="hero-desc-split">
+                            適用於小型裝修工程 (小於 69kVA )<br>
+                            提供符合標準的電力負載表 (Load Schedule) 與空調通風數據
+                        </p>
+                        
+                    </div>
+
+                    <div class="login-wrapper">
+                        <div class="login-card-split">
+                            <div class="login-header">
+                                <h3><i class="fas fa-user-lock"></i> 系統登入 User Login</h3>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">電話號碼 (澳門)</label>
+                                <div class="input-with-icon">
+                                    <i class="fas fa-phone-alt"></i>
+                                    <input type="tel" id="login-id" class="form-input" placeholder="6xxx xxxx" maxlength="8">
+                                </div>
+                            </div>
+                            <button onclick="RenoApp.doLogin()" class="btn btn-block btn-primary shadow-btn">
+                                立即開始 / 發送驗證碼
+                            </button>
+                            <p class="login-note">測試階段：輸入任意號碼即可登入</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="features" class="content-section">
+                     <div class="section-header">
+                        <h3>專業服務 Services</h3>
+                        <div class="divider-line"></div>
+                    </div>
+                    <div class="features-grid-split">
+                        <div class="feature-card-minimal">
+                            <div class="icon-box blue"><i class="fas fa-bolt"></i></div>
+                            <h4>電力負載計算</h4>
+                            <p>提供電力標準負載表 (Load Schedule)，包含線徑選型 (Cable Sizing) 與電壓降核算。</p>
+                        </div>
+                        <div class="feature-card-minimal">
+                            <div class="icon-box green"><i class="fas fa-wind"></i></div>
+                            <h4>HVAC 系統設計</h4>
+                            <p>根據不同場所要求，計算空調系統負荷及通風標準</p>
+                        </div>
+                        
+                    </div>
+                </section>
+
+                <section id="pricing" class="content-section bg-light">
+                    <div class="section-header">
+                        <h3>收費標準 Pricing</h3>
+                        <div class="divider-line"></div>
+                        <p style="margin-top:1rem; color:#718096;">簡單透明的收費模式，按項目付費 (Pay-per-project)</p>
+                    </div>
+
+                    <div class="pricing-grid">
+                        
+                        <div class="pricing-card popular">
+                            <div class="popular-badge">推薦 / Recommended</div>
+                            <div class="pricing-icon">
+                                <i class="fas fa-bolt"></i>
+                            </div>
+                            <h4>電力負載表生成<br><span style="font-size:0.8em; font-weight:400;">Electrical Load Schedule</span></h4>
+                            
+                            <div class="price-tag">
+                                <span class="currency">MOP</span>
+                                <span class="amount">288</span>
+                                <span class="period">/ 份報告</span>
+                            </div>
+
+                            <ul class="pricing-features">
+                                <li><i class="fas fa-check-circle"></i> 保護器及線徑選型 (Cable Sizing)</li>
+                                <li><i class="fas fa-check-circle"></i> 電壓降核算 (Voltage Drop)</li>
+                                <li><i class="fas fa-check-circle"></i> 選型CEM電錶功率</li>
+                                <li><i class="fas fa-check-circle"></i> 支援三相平衡計算</li>
+                                <li><i class="fas fa-file-pdf"></i> 生成 PDF 單線配電箱負載表</li>
+                            </ul>
+
+                            <button onclick="RenoApp.doLogin()" class="btn btn-primary btn-block shadow-btn">
+                                立即開始 Start Now
+                            </button>
+                        </div>
+
+                        <div class="pricing-card coming-soon">
+                            <div class="pricing-icon gray">
+                                <i class="fas fa-wind"></i>
+                            </div>
+                            <h4>空調及通風設計<br><span style="font-size:0.8em; font-weight:400;">HVAC Design Calc</span></h4>
+                            
+                            <div class="price-tag">
+                                <span class="amount" style="font-size: 2rem;">敬請期待</span>
+                                <span class="period" style="display:block;">Coming Soon</span>
+                            </div>
+
+                            <ul class="pricing-features">
+                                <li><i class="fas fa-hourglass-half"></i> 冷量負荷估算 (Cooling Load)</li>
+                                <li><i class="fas fa-hourglass-half"></i> 通風量計算 (Fresh Air)</li>
+                                <li><i class="fas fa-hourglass-half"></i> 滿足食肆/場所發牌要求</li>
+                            </ul>
+
+                            <button class="btn btn-secondary btn-block" disabled style="opacity: 0.7; cursor: not-allowed;">
+                                開發中 Under Dev
+                            </button>
+                        </div>
+
+                    </div>
+                </section>
+
+                <section id="contact" class="content-section bg-light">
+                     <div class="section-header">
+                        <h3>聯絡我們 Contact</h3>
+                        <div class="divider-line"></div>
+                    </div>
+                    <div class="contact-box">
+                        <p>如有任何問題或需提供入則服務，請以電郵方式聯絡我們：</p>
+                        <a href="mailto:project@reno-easy.mo" class="contact-link"><i class="fas fa-envelope"></i> project@reno-easy.mo</a>
+                    </div>
+                </section>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Page: Dashboard -->
+    <div id="page-dashboard" class="page">
+        <nav class="app-navbar">
+            <div class="app-brand">
+                <i class="fas fa-bolt"></i> RenoEasy Calc
+            </div>
+            <div class="user-controls">
+                <span><i class="fas fa-user-circle"></i> <span id="app-user-phone">User</span></span>
+                <button onclick="RenoApp.logout()" class="btn-logout">登出 Logout</button>
+            </div>
+        </nav>
+
+        <div class="dashboard-container">
+            <div class="dashboard-header" style="margin-bottom:2rem; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <h2 style="margin-bottom: 0.5rem;">專案概覽 Project Overview</h2>
+                    <p style="color: #718096; font-size: 0.9rem;">管理您的機電核算項目</p>
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <button onclick="RenoApp.createNewProject()" class="btn btn-primary shadow-btn">
+                        <i class="fas fa-bolt"></i> 新建電力計算
+                    </button>
+                    <button onclick="RenoApp.createNewHVACProject()" class="btn btn-hvac shadow-btn">
+                        <i class="fas fa-wind"></i> 新建 HVAC 設計
+                    </button>
+                </div>
+            </div>
+            
+            <div class="dashboard-split-layout">
+                
+                <div class="project-column">
+                    <div class="column-header">
+                        <i class="fas fa-bolt" style="color: var(--primary-color);"></i> 
+                        電力專案 Electrical
+                        <span class="count-badge" id="count-elec">0</span>
+                    </div>
+                    <div id="list-elec" class="project-list-column">
+                        </div>
+                </div>
+
+                <div class="project-column">
+                    <div class="column-header">
+                        <i class="fas fa-wind" style="color: var(--hvac-color);"></i> 
+                        空調通風 HVAC
+                        <span class="count-badge" id="count-hvac">0</span>
+                    </div>
+                    <div id="list-hvac" class="project-list-column">
+                        </div>
+                </div>
+
+            </div>
+        </div> </div>
+
+    <!-- Page: Workspace (Electrical) -->
+    <div id="page-workspace" class="page">
+        
+        <nav class="app-navbar">
+            <div class="app-brand" onclick="RenoApp.backToDashboard()" style="cursor: pointer;">
+                <i class="fas fa-chevron-left"></i> 專案概覽 Project Overview
+            </div>
+            <div class="user-controls">
+                </div>
+        </nav>
+
+        <div class="workspace-container" style="padding: 2rem;">
+            
+            <div style="margin-bottom: 2rem;">
+                <h2 id="workspace-project-name" style="margin-bottom: 0.5rem; color: var(--text-main);">未命名專案</h2>
+                <div style="display: flex; gap: 10px;">
+                    <span class="badge" style="background:#ebf8ff; color:var(--primary-color); padding:0.2rem 0.8rem; border-radius: 4px; font-size: 0.8rem; font-weight: 600;">
+                        <i class="fas fa-bolt"></i> 電力系統 Electrical
+                    </span>
+                    <span id="workspace-status" style="font-size: 0.8rem; color: #718096; display: flex; align-items: center;">
+                        設計中 Editing...
+                    </span>
+                </div>
+            </div>
+
+            <div class="section-box" style="min-height: 400px; background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #edf2f7; padding-bottom: 1rem; margin-bottom: 1rem;">
+                    <h3 style="font-size: 1.1rem; color: #2d3748; margin: 0;">
+                        <i class="fas fa-list-ul"></i> 設備清單 Load Schedule Input
+                    </h3>
+                    <small style="color: #a0aec0;">系統將自動進行分組與平衡計算</small>
+                </div>
+                <div id="added-items-list" class="load-list"></div>
+                <div class="action-bar" style="margin-top: 2rem; margin-bottom: 8rem; text-align: center;">
+                <button onclick="RenoApp.calculateResult()" class="btn btn-primary btn-lg shadow-btn" style="padding: 1rem 4rem; font-size: 1.2rem; border-radius: 50px;">
+                    <i class="fas fa-calculator"></i> 開始核算 Generate Report
+                </button>
+            </div>
+            </div>
+
+            <div class="sticky-input-bar">
+                <div class="input-group" style="flex: 2; min-width: 200px;">
+                    <label>Device Type 設備類型</label>
+                    <select id="in-type" onchange="RenoApp.handleDeviceChange()"></select>
+                </div>
+                <div class="input-group" style="width: 110px;">
+                    <label>Phase 相位</label>
+                    <select id="in-phase" onchange="RenoApp.checkInput()">
+                        <option value="1">1-Ph 單相</option>
+                        <option value="3">3-Ph 三相</option>
+                    </select>
+                </div>
+                <div class="input-group" style="width: 80px;">
+                    <label>Qty 數量</label>
+                    <input type="number" id="in-qty" min="1" placeholder="0" oninput="RenoApp.checkInput()">
+                </div>
+                <div class="input-group" style="width: 100px;">
+                    <label>Power 功率</label>
+                    <input type="number" id="in-power" step="0.1" placeholder="0" oninput="RenoApp.autoSetPhase(); RenoApp.checkInput()">
+                </div>
+                <div class="input-group" style="width: 60px;">
+                    <label>Unit</label>
+                    <div id="in-unit-display" class="unit-display">W</div>
+                </div>
+                <div class="input-group" style="width: 80px;">
+                    <label>Length (m)</label>
+                    <input type="number" id="in-len" min="1" value="20">
+                </div>
+                <button id="btn-add-item" onclick="RenoApp.addItem()" disabled>
+                    <i class="fas fa-plus"></i> 加入 Add
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- Page: Result (Electrical) -->
+    <div id="page-result" class="page">
+        <div class="result-container">
+            <div style="display:flex; align-items:center; gap:1rem; margin-bottom:2rem;">
+                <button onclick="RenoApp.showPage('page-workspace')" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> 返回編輯
+                </button>
+                <h2>核算結果 Calculation Result</h2>
+            </div>
+            <div class="result-summary">
+                <div class="summary-item"><label>Sum. Demand 最高總需量</label><div class="value" id="res-demand">--</div></div>
+                <div class="summary-item"><label>建議電錶 Recommended Meter</label><div class="value" id="res-meter">--</div></div>
+            </div>
+            <div id="res-warning" class="warning-box hidden">
+                <i class="fas fa-exclamation-triangle"></i><strong>超出業務範圍!</strong>本系統專注於小型裝修工程 (&lt; 69kVA)。您的專案需求超過此範圍,建議諮詢註冊工程師。
+            </div>
+            <div class="section-box">
+                <h3>Load Schedule 負載表預覽</h3>
+                <p class="note">詳細數據已模糊處理,請購買完整報告以查看。</p>
+                <div class="preview-table-container">
+                    <div class="preview-table">
+                        <div class="preview-table-header" style="grid-template-columns: 0.6fr 2.2fr 0.7fr 0.8fr 1.2fr 0.9fr 0.8fr 1.1fr 0.7fr;">
+                            <div>Circuit No.<br>迴路編號</div>
+                            <div>Description<br>用途</div>
+                            <div>Phase<br>相位</div>
+                            <div>Breaker<br>保護器</div>
+                            <div>Protection Type<br>保護類型</div>
+                            <div>Cable Size<br>線徑(mm²)</div>
+                            <div>Voltage Drop<br>電壓降</div>
+                            <div>Installed Power<br>Pinst<br>安裝功率(kVA)</div>
+                            <div>DF<br>同時係數</div>
+                        </div>
+                        <div id="result-preview-rows"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="premium-card">
+                <div class="premium-content">
+                    <h3>🔓 解鎖完整專業報告</h3>
+                    <p>獲取包含所有詳細計算、三相平衡圖、CEM 標準匹配的 <strong>單線圖 (Single Line) 格式 PDF</strong></p>
+                    <ul>
+                        <li>✅ 完整 9 欄表格數據</li>
+                        <li>✅ 三相平衡圓餅圖</li>
+                        <li>✅ 符合澳門 CEM 標準</li>
+                    </ul>
+                    <div class="premium-price">
+                        <span class="price">MOP 288</span>
+                        <span class="price-note">限時優惠</span>
+                    </div>
+                    <button onclick="RenoApp.unlockPremium()" class="btn-premium">立即購買 Purchase Now</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page: HVAC Workspace (New Module) -->
+    <div id="page-hvac" class="page">
+        
+        <nav class="app-navbar">
+            <div class="app-brand" onclick="RenoApp.backToDashboard()" style="cursor: pointer;">
+                <i class="fas fa-chevron-left"></i> 專案概覽 Project Overview
+            </div>
+            
+            <div class="user-controls">
+                <button class="btn" disabled style="
+                    background: rgba(255, 193, 7, 0.2); 
+                    color: #ffd700; 
+                    border: 1px solid #ffd700; 
+                    opacity: 1 !important;
+                    filter: none !important;
+                    font-size: 0.9rem; 
+                    cursor: not-allowed;
+                    font-weight: 600;">
+                    <i class="fas fa-hammer"></i> 報告生成敬請期待 (Dev)
+                </button>
+            </div>
+        </nav>
+
+        <div class="workspace-container" style="padding: 2rem;">
+            
+            <div style="margin-bottom: 2rem;">
+                <h2 style="margin-bottom: 0.5rem; color: var(--text-main);">HVAC 設計專案</h2>
+                <div style="display: flex; gap: 10px;">
+                    <span class="badge" style="background:#f0fff4; color:var(--hvac-color); padding:0.2rem 0.8rem; border-radius: 4px; font-size: 0.8rem; font-weight: 600; border: 1px solid #c6f6d5;">
+                        <i class="fas fa-wind"></i> 空調通風設計 HVAC Design
+                    </span>
+                </div>
+            </div>
+
+            <div class="section-box" style="min-height: 450px; background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #edf2f7; padding-bottom: 1rem; margin-bottom: 1rem;">
+                    <h3 style="font-size: 1.1rem; color: #2d3748; margin: 0;">
+                        <i class="fas fa-list-ol"></i> 空間需求列表 Requirement Schedule
+                    </h3>
+                    <small style="color: #a0aec0;">*估算值僅供參考 For Reference Only</small>
+                </div>
+                
+                <div class="preview-table-container" style="border: none; margin-top: 0;">
+                    <div class="preview-table" style="min-width: 1000px;">
+                        <div class="preview-table-header" style="background-color: var(--hvac-color); border-radius: 6px 6px 0 0; grid-template-columns: 0.5fr 1.3fr 0.9fr 0.9fr 1.1fr 1.1fr 1.1fr 0.5fr;">
+                            <div>No.</div>
+                            <div>Room Usage<br>房間用途</div>
+                            <div>Area<br>面積 (m²)</div>
+                            <div>People<br>人數</div>
+                            <div>Cooling Load<br>冷量需求</div>
+                            <div>Fresh Air<br>鮮風需求</div>
+                            <div>Exhaust Air<br>排風需求</div>
+                            <div><i class="fas fa-cog"></i></div>
+                        </div>
+                        <div id="hvac-list-rows">
+                            <div style="padding:4rem; text-align:center; color:#a0aec0;">
+                                <i class="fas fa-wind" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i><br>
+                                暫無項目 No items added
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="sticky-input-bar" style="border-top-color: var(--hvac-color);">
+                
+                <div class="input-group" style="flex: 1; min-width: 200px;">
+                    <label>Room Usage 房間用途</label>
+                    <select id="hvac-type" style="width: 100%;">
+                        <option value="">Loading...</option>
+                    </select>
+                </div>
+
+                <div class="input-group" style="width: 130px;">
+                    <label>Area 面積 (m²)</label>
+                    <input type="number" id="hvac-area" min="0" placeholder="0">
+                </div>
+
+                <div class="input-group" style="width: 140px;">
+                    <label>Height 高度 (m)</label>
+                    <input type="number" id="hvac-height" value="3.0" step="0.1">
+                </div>
+
+                <div class="input-group" style="width: 120px;">
+                    <label>People 人數</label>
+                    <input type="number" id="hvac-people" value="0" min="0" placeholder="0">
+                </div>
+
+                <div class="input-group">
+                    <button onclick="HVACModule.addItem()" class="btn btn-hvac" style="height: 42px; display: flex; align-items: center; gap: 5px; white-space: nowrap;">
+                        <i class="fas fa-plus"></i> 計算 Calc
+                    </button>
+                </div>
+            </div> 
+        </div>
+    </div>  
+
+    <!-- Scripts -->
+    <script src="engine.js"></script>
+    <script src="hvac.js"></script>
+    <script src="app.js"></script>
+    
+    <div id="reno-modal" class="modal-overlay hidden">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 id="modal-title">系統提示 System Notice</h3>
+            </div>
+            <div class="modal-body">
+                <p id="modal-desc" style="margin-bottom:1rem; color:#718096;"></p>
+                <input type="text" id="modal-input" class="form-input hidden" placeholder="輸入內容..." autocomplete="off">
+            </div>
+            <div class="modal-footer">
+                <button id="modal-btn-cancel" class="btn btn-secondary">取消 Cancel</button>
+                <button id="modal-btn-confirm" class="btn btn-primary">確定 Confirm</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
