@@ -674,21 +674,41 @@ const RenoApp = {
         }
         */
     },
-
+    // [新增] 檢查專案是否已解鎖，決定是下載還是跳出付費框
+    handleExportRequest: function() {
+        const project = this.state.projects[this.state.currentProjectIdx];
+        
+        // 1. 如果專案已經標記為「已付費 (is_paid)」，直接生成報告
+        if (project.is_paid === true) {
+            this.generatePDFProcess(); // 直接下載
+        } else {
+            // 2. 如果還沒付費，才打開付費視窗
+            this.unlockPremium(); 
+        }
+    },
     // 6. 優惠碼 (已美化彈窗)
+    // [修改] 優惠碼驗證邏輯
     redeemCode: async function() {
         const input = document.getElementById('promo-code-input');
         if (!input) return;
         const code = input.value.trim().toUpperCase();
+        const project = this.state.projects[this.state.currentProjectIdx];
 
         if (code === 'VIP888') {
-            // 關閉支付框
+            // 1. 關閉視窗
             this.closePaymentModal();
 
-            // 顯示成功彈窗 (取代醜陋的 alert)
+            // 2. 【核心修改】將此專案標記為已付費
+            project.is_paid = true;
+            
+            // 3. 【核心修改】立刻存檔到雲端 (這樣下次登入還會記得)
+            // 這裡直接用 saveProjects() 就會把 is_paid 狀態一起存進 user_data 表
+            await this.saveProjects();
+
+            // 4. 顯示成功並下載
             await this.showCustomModal(
                 '驗證成功 Success', 
-                '🎉 優惠碼驗證成功！\n您已獲得試營運期間的免費解鎖權限。', 
+                '🎉 專案已解鎖！您可以永久免費修改並下載此報告。', 
                 false
             );
             
