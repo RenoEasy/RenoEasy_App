@@ -1,1 +1,13 @@
-.vercel
+# --- 忽略 Google Drive / 雲端硬碟垃圾 ---
+.tmp.driveupload*
+.tmp.drivedownload*
+*.tmp
+*.bak
+desktop.ini
+Thumbs.db
+
+# --- 忽略 VS Code 設定檔 ---
+.vscode/
+
+# --- 忽略備份資料夾 (如果你有的話) ---
+BACKUP*/
