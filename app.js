@@ -1731,180 +1731,428 @@ const RenoApp = {
         }
     },
 
+    // =========================================================================
+    // HVAC Canvas 報告生成器
+    // =========================================================================
+    generateHVACReportCanvas: function(item, projectName, roomIndex, totalRooms) {
+        return new Promise((resolve) => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Canvas 尺寸設定（A4 豎向 300dpi）
+            const WIDTH = 2480;  // A4 width at 300dpi
+            const HEIGHT = 3508; // A4 height at 300dpi
+            canvas.width = WIDTH;
+            canvas.height = HEIGHT;
+            
+            // 顏色定義
+            const COLOR_PRIMARY = '#003399';
+            const COLOR_HEADER_BG = '#f0f0f0';
+            const COLOR_HIGHLIGHT_GREEN = '#d4edda';
+            const COLOR_HIGHLIGHT_BLUE = '#e6f7ff';
+            const COLOR_HIGHLIGHT_YELLOW = '#fff3cd';
+            const COLOR_BORDER = '#cccccc';
+            const COLOR_TEXT = '#000000';
+            
+            // 字體設定
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, WIDTH, HEIGHT);
+            
+            let y = 80; // 起始 Y 座標
+            const MARGIN = 80;
+            const TABLE_WIDTH = WIDTH - MARGIN * 2;
+            
+            // ====== 標題區 ======
+            ctx.fillStyle = COLOR_PRIMARY;
+            ctx.fillRect(MARGIN, y, TABLE_WIDTH, 100);
+            
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 48px Arial';
+            ctx.fillText('空調負荷計算書 (AC Load Calculation)', MARGIN + 20, y + 65);
+            
+            y += 110;
+            ctx.fillStyle = COLOR_TEXT;
+            ctx.font = '32px Arial';
+            ctx.fillText(`Project: ${projectName} | Room: ${item.label}`, MARGIN + 20, y + 30);
+            
+            y += 80;
+            
+            const data = item.detailedLoad;
+            
+            // ====== Section 1: Design Parameters ======
+            this.drawHVACSection1(ctx, data, item, y, MARGIN, TABLE_WIDTH);
+            y += this.calculateSection1Height();
+            
+            // ====== Section 2: Load Summary ======
+            y += 60;
+            this.drawHVACSection2(ctx, data, y, MARGIN, TABLE_WIDTH);
+            y += this.calculateSection2Height(data);
+            
+            // ====== Section 3: Equipment Sizing ======
+            y += 60;
+            this.drawHVACSection3(ctx, data, y, MARGIN, TABLE_WIDTH);
+            
+            resolve(canvas);
+        });
+    },
+    
+    // Section 1: Design Parameters 繪製
+    drawHVACSection1: function(ctx, data, item, startY, margin, tableWidth) {
+        let y = startY;
+        const COLOR_PRIMARY = '#003399';
+        const COLOR_HEADER_BG = '#f0f0f0';
+        const COLOR_BORDER = '#cccccc';
+        
+        // 標題
+        ctx.fillStyle = COLOR_PRIMARY;
+        ctx.fillRect(margin, y, tableWidth, 60);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 36px Arial';
+        ctx.fillText('1. Design Parameters (設計參數)', margin + 20, y + 42);
+        
+        y += 60;
+        
+        // 表頭
+        ctx.fillStyle = COLOR_HEADER_BG;
+        ctx.fillRect(margin, y, tableWidth, 50);
+        
+        // 繪製表頭邊框
+        ctx.strokeStyle = COLOR_BORDER;
+        ctx.lineWidth = 2;
+        ctx.strokeRect(margin, y, tableWidth, 50);
+        
+        // 表頭文字
+        ctx.fillStyle = '#000000';
+        ctx.font = 'bold 28px Arial';
+        const col1 = margin + 20;
+        const col2 = margin + tableWidth * 0.25;
+        const col3 = margin + tableWidth * 0.50;
+        const col4 = margin + tableWidth * 0.70;
+        const col5 = margin + tableWidth * 0.85;
+        
+        ctx.fillText('Item', col1, y + 35);
+        ctx.fillText('Description', col2, y + 35);
+        ctx.fillText('Summer', col3, y + 35);
+        ctx.fillText('Winter', col4, y + 35);
+        ctx.fillText('Unit', col5, y + 35);
+        
+        y += 50;
+        
+        // 繪製表格內容（使用 REPORT_SCHEMA）
+        const rows = [
+            { en: 'Outdoor Condition', zh: '室外設計工況', summer: `${data.design_params.outdoor_temp_db} / ${data.design_params.outdoor_temp_wb}`, winter: '7', unit: '°C DB/WB' },
+            { en: 'Specific Enthalpy of Outdoor Air', zh: '室外焓值', summer: data.design_params.outdoor_enthalpy.toFixed(2), winter: '--', unit: 'kJ/kg' },
+            { en: 'Indoor Temperature', zh: '設計室內溫度', summer: data.design_params.indoor_temp, winter: '', unit: '°C' },
+            { en: 'Indoor RH', zh: '設計室內濕度', summer: data.design_params.indoor_rh, winter: '', unit: 'RH' },
+            { en: 'Specific Enthalpy of Indoor Air', zh: '設計室內焓值', summer: data.design_params.indoor_enthalpy.toFixed(2), winter: '', unit: 'kJ/kg' },
+            { en: 'Area', zh: '空間面積', summer: item.A, winter: '', unit: 'm²' },
+            { en: 'Fresh Air Rate', zh: '新風量標準(Min.)', summer: data.design_params.fresh_air_rate, winter: '', unit: 'L/s/person' },
+            { en: 'Exhaust Air Rate', zh: '排風量標準(Min.)', summer: data.design_params.exhaust_air_rate, winter: '', unit: 'ACH' },
+            { en: 'Lighting', zh: '燈光密度', summer: data.design_params.lighting_density, winter: '', unit: 'W/m²' },
+            { en: 'Equip.', zh: '設備密度', summer: data.design_params.equipment_density, winter: '', unit: 'W/m²' }
+        ];
+        
+        ctx.font = '24px Arial';
+        const rowHeight = 50;
+        
+        rows.forEach((row, idx) => {
+            // 背景（奇偶行）
+            if (idx % 2 === 0) {
+                ctx.fillStyle = '#ffffff';
+            } else {
+                ctx.fillStyle = '#f9f9f9';
+            }
+            ctx.fillRect(margin, y, tableWidth, rowHeight);
+            
+            // 邊框
+            ctx.strokeStyle = COLOR_BORDER;
+            ctx.strokeRect(margin, y, tableWidth, rowHeight);
+            
+            // 文字
+            ctx.fillStyle = '#000000';
+            ctx.fillText(row.en, col1, y + 33);
+            ctx.fillText(row.zh, col2, y + 33);
+            ctx.fillText(String(row.summer), col3, y + 33);
+            ctx.fillText(String(row.winter), col4, y + 33);
+            ctx.fillText(row.unit, col5, y + 33);
+            
+            y += rowHeight;
+        });
+    },
+    
+    calculateSection1Height: function() {
+        return 60 + 50 + (50 * 10); // 標題 + 表頭 + 10行數據
+    },
+    
+    // Section 2: Load Summary 繪製
+    drawHVACSection2: function(ctx, data, startY, margin, tableWidth) {
+        let y = startY;
+        const COLOR_PRIMARY = '#003399';
+        const COLOR_HEADER_BG = '#f0f0f0';
+        const COLOR_BORDER = '#cccccc';
+        const COLOR_HIGHLIGHT = '#e6f7ff';
+        
+        // 標題
+        ctx.fillStyle = COLOR_PRIMARY;
+        ctx.fillRect(margin, y, tableWidth, 60);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 36px Arial';
+        ctx.fillText('2. Cooling Load Summary (冷負荷摘要)', margin + 20, y + 42);
+        
+        y += 60;
+        
+        // Peak Time
+        ctx.fillStyle = '#000000';
+        ctx.font = '28px Arial';
+        ctx.fillText(`Peak Time Occurrence: ${data.load_summary.peak_hour}:00`, margin + 20, y + 35);
+        
+        y += 50;
+        
+        // 表頭
+        ctx.fillStyle = COLOR_HEADER_BG;
+        ctx.fillRect(margin, y, tableWidth, 50);
+        ctx.strokeStyle = COLOR_BORDER;
+        ctx.strokeRect(margin, y, tableWidth, 50);
+        
+        ctx.fillStyle = '#000000';
+        ctx.font = 'bold 28px Arial';
+        const col1 = margin + 20;
+        const col2 = margin + tableWidth * 0.50;
+        const col3 = margin + tableWidth * 0.70;
+        const col4 = margin + tableWidth * 0.85;
+        
+        ctx.fillText('Load Component (負荷分項)', col1, y + 35);
+        ctx.fillText('Sensible (W)', col2, y + 35);
+        ctx.fillText('Latent (W)', col3, y + 35);
+        ctx.fillText('Total (W)', col4, y + 35);
+        
+        y += 50;
+        
+        // 數據行
+        const rows = [
+            { 
+                label: '1. Envelope Load (圍護結構負荷)', 
+                sensible: data.load_summary.glass_radiation.sensible + data.load_summary.glass_conduction.sensible + data.load_summary.wall_roof.sensible,
+                latent: '-',
+                total: data.load_summary.glass_radiation.total + data.load_summary.glass_conduction.total + data.load_summary.wall_roof.total,
+                isBold: false, isHighlight: false
+            },
+            { label: '2. People (人員)', sensible: data.load_summary.people.sensible, latent: data.load_summary.people.latent, total: data.load_summary.people.total, isBold: false, isHighlight: false },
+            { label: '3. Lighting (燈光)', sensible: data.load_summary.lighting.sensible, latent: '-', total: data.load_summary.lighting.total, isBold: false, isHighlight: false },
+            { label: '4. Equipment (設備)', sensible: data.load_summary.equipment.sensible, latent: '-', total: data.load_summary.equipment.total, isBold: false, isHighlight: false },
+            { label: '5. Fresh Air Load (新風負荷)', sensible: data.load_summary.fresh_air.sensible, latent: data.load_summary.fresh_air.latent, total: data.load_summary.fresh_air.total, isBold: false, isHighlight: false },
+            { label: 'Sub-Total (Room Load)', sensible: data.load_summary.subtotal.sensible, latent: data.load_summary.subtotal.latent, total: data.load_summary.subtotal.total, isBold: true, isHighlight: false },
+            { label: 'GRAND TOTAL (Peak Load)', sensible: data.load_summary.grand_total.sensible, latent: data.load_summary.grand_total.latent, total: data.load_summary.grand_total.total, isBold: true, isHighlight: true }
+        ];
+        
+        const rowHeight = 50;
+        
+        rows.forEach((row) => {
+            // 背景顏色
+            if (row.isHighlight) {
+                ctx.fillStyle = COLOR_HIGHLIGHT;
+            } else if (row.isBold) {
+                ctx.fillStyle = '#f9f9f9';
+            } else {
+                ctx.fillStyle = '#ffffff';
+            }
+            ctx.fillRect(margin, y, tableWidth, rowHeight);
+            
+            // 邊框
+            ctx.strokeStyle = COLOR_BORDER;
+            ctx.strokeRect(margin, y, tableWidth, rowHeight);
+            
+            // 文字
+            ctx.fillStyle = '#000000';
+            ctx.font = row.isBold ? 'bold 26px Arial' : '24px Arial';
+            ctx.fillText(row.label, col1, y + 33);
+            ctx.fillText(String(row.sensible), col2, y + 33);
+            ctx.fillText(String(row.latent), col3, y + 33);
+            ctx.fillText(String(row.total), col4, y + 33);
+            
+            y += rowHeight;
+        });
+    },
+    
+    calculateSection2Height: function(data) {
+        return 60 + 50 + 50 + (50 * 7); // 標題 + Peak Time + 表頭 + 7行數據
+    },
+    
+    // Section 3: Equipment Sizing 繪製
+    drawHVACSection3: function(ctx, data, startY, margin, tableWidth) {
+        let y = startY;
+        const COLOR_PRIMARY = '#003399';
+        const COLOR_HEADER_BG = '#f0f0f0';
+        const COLOR_BORDER = '#cccccc';
+        const COLOR_GREEN = '#d4edda';
+        const COLOR_BLUE = '#e6f7ff';
+        const COLOR_YELLOW = '#fff3cd';
+        
+        // 標題
+        ctx.fillStyle = COLOR_PRIMARY;
+        ctx.fillRect(margin, y, tableWidth, 60);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 36px Arial';
+        ctx.fillText('3. Equipment Sizing (設備選型)', margin + 20, y + 42);
+        
+        y += 60;
+        
+        // 表頭
+        ctx.fillStyle = COLOR_HEADER_BG;
+        ctx.fillRect(margin, y, tableWidth, 50);
+        ctx.strokeStyle = COLOR_BORDER;
+        ctx.strokeRect(margin, y, tableWidth, 50);
+        
+        ctx.fillStyle = '#000000';
+        ctx.font = 'bold 28px Arial';
+        const col1 = margin + 20;
+        const col2 = margin + tableWidth * 0.65;
+        const col3 = margin + tableWidth * 0.85;
+        
+        ctx.fillText('Item', col1, y + 35);
+        ctx.fillText('Value', col2, y + 35);
+        ctx.fillText('Unit', col3, y + 35);
+        
+        y += 50;
+        
+        const rowHeight = 50;
+        
+        // A. Cooling Capacity
+        this.drawEquipmentRow(ctx, margin, tableWidth, y, 'A. Cooling Capacity (製冷量)', '', '', COLOR_BLUE, true);
+        y += rowHeight;
+        
+        this.drawEquipmentRow(ctx, margin, tableWidth, y, 'Grand Total Load (峰值總負荷)', data.equipment_sizing.cooling.grand_total_w, 'W', '#ffffff', false);
+        y += rowHeight;
+        
+        this.drawEquipmentRow(ctx, margin, tableWidth, y, 'Safety Factor (安全係數)', `${data.equipment_sizing.cooling.safety_factor}%`, '', '#ffffff', false);
+        y += rowHeight;
+        
+        this.drawEquipmentRow(ctx, margin, tableWidth, y, 'Required Cooling Capacity (需求製冷量)', data.equipment_sizing.cooling.required_kw, 'kW', COLOR_GREEN, true);
+        y += rowHeight;
+        
+        // B. Fresh Air Flow Rate
+        this.drawEquipmentRow(ctx, margin, tableWidth, y, 'B. Fresh Air Flow Rate (新風量計算)', '', '', COLOR_BLUE, true);
+        y += rowHeight;
+        
+        this.drawEquipmentRow(ctx, margin, tableWidth, y, 'Room Sensible Load (房間顯熱)', data.equipment_sizing.airflow.room_sensible_w, 'W', '#ffffff', false);
+        y += rowHeight;
+        
+        this.drawEquipmentRow(ctx, margin, tableWidth, y, 'Supply Air dT (送風溫差)', data.equipment_sizing.airflow.supply_air_dt, 'K', '#ffffff', false);
+        y += rowHeight;
+        
+        this.drawEquipmentRow(ctx, margin, tableWidth, y, 'Air Density x Specific Heat (空氣密度×比熱)', data.equipment_sizing.airflow.air_density_cp, '', '#ffffff', false);
+        y += rowHeight;
+        
+        this.drawEquipmentRow(ctx, margin, tableWidth, y, 'Required Fresh Air Flow (需求新風量)', data.equipment_sizing.airflow.required_cmh, 'CMH', COLOR_GREEN, true);
+        y += rowHeight;
+        
+        // C. Exhaust Air Flow Rate (條件顯示)
+        if (data.equipment_sizing.exhaust.required_cmh > 0) {
+            this.drawEquipmentRow(ctx, margin, tableWidth, y, 'C. Exhaust Air Flow Rate (排風量計算)', '', '', COLOR_YELLOW, true);
+            y += rowHeight;
+            
+            this.drawEquipmentRow(ctx, margin, tableWidth, y, 'Volume (空間體積)', data.equipment_sizing.exhaust.volume_m3, 'm3', '#ffffff', false);
+            y += rowHeight;
+            
+            this.drawEquipmentRow(ctx, margin, tableWidth, y, 'Air Change Rate (排風量標準)', data.equipment_sizing.exhaust.ach, 'ACH', '#ffffff', false);
+            y += rowHeight;
+            
+            this.drawEquipmentRow(ctx, margin, tableWidth, y, 'Required Exhaust Air Flow (需求排風量)', data.equipment_sizing.exhaust.required_cmh, 'CMH', COLOR_GREEN, true);
+        }
+    },
+    
+    drawEquipmentRow: function(ctx, margin, tableWidth, y, label, value, unit, bgColor, isBold) {
+        const rowHeight = 50;
+        const COLOR_BORDER = '#cccccc';
+        
+        // 背景
+        ctx.fillStyle = bgColor;
+        ctx.fillRect(margin, y, tableWidth, rowHeight);
+        
+        // 邊框
+        ctx.strokeStyle = COLOR_BORDER;
+        ctx.strokeRect(margin, y, tableWidth, rowHeight);
+        
+        // 文字
+        ctx.fillStyle = '#000000';
+        ctx.font = isBold ? 'bold 26px Arial' : '24px Arial';
+        
+        const col1 = margin + 20;
+        const col2 = margin + tableWidth * 0.65;
+        const col3 = margin + tableWidth * 0.85;
+        
+        ctx.fillText(label, col1, y + 33);
+        if (value !== '') ctx.fillText(String(value), col2, y + 33);
+        if (unit !== '') ctx.fillText(unit, col3, y + 33);
+    },
     // ========================================================================
     // [已修復] HVAC PDF 報告生成 (HTML 轉圖片方案)
     // ========================================================================
+    // ========================================================================
+    // HVAC PDF 報告生成 (Canvas 方案 - 參考電力報告架構)
+    // ========================================================================
     generateHVACReport: async function() {
         if (!HVACModule.items || HVACModule.items.length === 0) {
-             this.showCustomModal("提示", "請先進行計算", false); return;
+            this.showCustomModal("提示", "請先進行計算", false); 
+            return;
         }
         
         const hasPremiumData = HVACModule.items.some(item => item.detailedLoad);
         if (!hasPremiumData) {
-            this.showCustomModal("需要計算", "請先點擊「開始計算」獲取結果，然後再下載報告。", false); return;
+            this.showCustomModal("需要計算", "請先點擊「開始計算」獲取結果，然後再下載報告。", false); 
+            return;
         }
 
-        // 這裡現在可以安全呼叫了，因為我們上面補上了定義
         this.showLoading(true);
 
         try {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF('p', 'mm', 'a4');
-            const PAGE_WIDTH = 210; const PAGE_HEIGHT = 297; const MARGIN = 10;
-
-            const reportContainer = document.createElement('div');
-            reportContainer.style.position = 'absolute';
-            reportContainer.style.top = '-9999px';
-            reportContainer.style.left = '0';
-            reportContainer.style.width = '800px';
-            reportContainer.style.backgroundColor = '#ffffff';
-            reportContainer.style.padding = '20px';
-            document.body.appendChild(reportContainer);
-
+            const PAGE_WIDTH = 210; 
+            const PAGE_HEIGHT = 297;
+            
+            // 獲取專案名稱
+            const projectName = this.state.projects[this.state.currentProjectIdx]?.name || "Untitled";
+            
+            // 為每個房間生成 Canvas 並添加到 PDF
             for (let i = 0; i < HVACModule.items.length; i++) {
                 const item = HVACModule.items[i];
                 if (!item.detailedLoad) continue;
-                const data = item.detailedLoad;
-
-                const projectName = this.state.projects[this.state.currentProjectIdx]?.name || "Untitled";
                 
-                let htmlContent = `
-                    <div style="font-family: sans-serif; color: #000;">
-                        <div style="border-bottom: 2px solid #003399; padding-bottom: 10px; margin-bottom: 20px;">
-                            <h2 style="color: #003399; margin: 0;">空調負荷計算書 (AC Load Calculation)</h2>
-                            <p style="margin: 5px 0 0 0; font-size: 14px;">Project: ${projectName} | Room: ${item.label}</p>
-                        </div>
-                        <h3 style="background: #003399; color: white; padding: 5px 10px; font-size: 14px; margin: 0;">1. Design Parameters (設計參數)</h3>
-                        <table style="width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 20px;">
-                            <tr style="background: #f0f0f0;">
-                                <th style="border: 1px solid #ccc; padding: 4px; text-align: left;">Item</th>
-                                <th style="border: 1px solid #ccc; padding: 4px; text-align: left;">Description</th>
-                                <th style="border: 1px solid #ccc; padding: 4px; text-align: center;">Summer</th>
-                                <th style="border: 1px solid #ccc; padding: 4px; text-align: center;">Winter</th>
-                                <th style="border: 1px solid #ccc; padding: 4px; text-align: center;">Unit</th>
-                            </tr>
-                            ${REPORT_SCHEMA.designParams.rows.map(row => `
-                                <tr>
-                                    <td style="border: 1px solid #ccc; padding: 4px;">${row.label_en}</td>
-                                    <td style="border: 1px solid #ccc; padding: 4px;">${row.label_zh}</td>
-                                    <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">${row.getValue(data, item)}</td>
-                                    <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">${row.winterValue}</td>
-                                    <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">${row.unit}</td>
-                                </tr>`).join('')}
-                        </table>
-                        <h3 style="background: #003399; color: white; padding: 5px 10px; font-size: 14px; margin: 0;">2. Cooling Load Summary (冷負荷摘要)</h3>
-                        <div style="font-size: 12px; margin: 5px 0;">Peak Time Occurrence: ${data.load_summary.peak_hour}:00</div>
-                        <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
-                            <tr style="background: #f0f0f0;">
-                                <th style="border: 1px solid #ccc; padding: 4px; text-align: left;">Load Component (負荷分項)</th>
-                                <th style="border: 1px solid #ccc; padding: 4px; text-align: right;">Sensible (W)</th>
-                                <th style="border: 1px solid #ccc; padding: 4px; text-align: right;">Latent (W)</th>
-                                <th style="border: 1px solid #ccc; padding: 4px; text-align: right;">Total (W)</th>
-                            </tr>
-                            ${REPORT_SCHEMA.loadSummary.rows.map(row => {
-                                const bgStyle = row.isHighlight ? 'background-color: #e6f7ff;' : '';
-                                const fontStyle = row.isBold ? 'font-weight: bold;' : '';
-                                return `<tr style="${bgStyle} ${fontStyle}">
-                                    <td style="border: 1px solid #ccc; padding: 4px;">${row.label}</td>
-                                    <td style="border: 1px solid #ccc; padding: 4px; text-align: right;">${row.sensible(data)}</td>
-                                    <td style="border: 1px solid #ccc; padding: 4px; text-align: right;">${row.latent(data)}</td>
-                                    <td style="border: 1px solid #ccc; padding: 4px; text-align: right;">${row.total(data)}</td>
-                                </tr>`;
-                            }).join('')}
-                        </table>
-                        <h3 style="background: #003399; color: white; padding: 5px 10px; font-size: 14px; margin: 20px 0 0 0;">3. Equipment Sizing (設備選型)</h3>
-                        <table style="width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 20px;">
-                            <tr style="background: #f0f0f0;">
-                                <th style="border: 1px solid #ccc; padding: 4px; text-align: left;">Item</th>
-                                <th style="border: 1px solid #ccc; padding: 4px; text-align: center;">Value</th>
-                                <th style="border: 1px solid #ccc; padding: 4px; text-align: center;">Unit</th>
-                            </tr>
-                            
-                            <!-- A. Cooling Capacity -->
-                            <tr style="background: #e6f7ff;">
-                                <td colspan="3" style="border: 1px solid #ccc; padding: 4px; font-weight: bold;">A. Cooling Capacity (製冷量)</td>
-                            </tr>
-                            <tr>
-                                <td style="border: 1px solid #ccc; padding: 4px;">Grand Total Load (峰值總負荷)</td>
-                                <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">${data.equipment_sizing.cooling.grand_total_w}</td>
-                                <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">W</td>
-                            </tr>
-                            <tr>
-                                <td style="border: 1px solid #ccc; padding: 4px;">Safety Factor (安全係數)</td>
-                                <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">${data.equipment_sizing.cooling.safety_factor}%</td>
-                                <td style="border: 1px solid #ccc; padding: 4px; text-align: center;"></td>
-                            </tr>
-                            <tr style="background: #d4edda;">
-                                <td style="border: 1px solid #ccc; padding: 4px; font-weight: bold;">Required Cooling Capacity (需求製冷量)</td>
-                                <td style="border: 1px solid #ccc; padding: 4px; text-align: center; font-weight: bold;">${data.equipment_sizing.cooling.required_kw}</td>
-                                <td style="border: 1px solid #ccc; padding: 4px; text-align: center; font-weight: bold;">kW</td>
-                            </tr>
-                            
-                            <!-- B. Fresh Air Flow Rate -->
-                            <tr style="background: #e6f7ff;">
-                                <td colspan="3" style="border: 1px solid #ccc; padding: 4px; font-weight: bold;">B. Fresh Air Flow Rate (新風量計算)</td>
-                            </tr>
-                            <tr>
-                                <td style="border: 1px solid #ccc; padding: 4px;">Room Sensible Load (房間顯熱)</td>
-                                <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">${data.equipment_sizing.airflow.room_sensible_w}</td>
-                                <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">W</td>
-                            </tr>
-                            <tr>
-                                <td style="border: 1px solid #ccc; padding: 4px;">Supply Air dT (送風溫差)</td>
-                                <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">${data.equipment_sizing.airflow.supply_air_dt}</td>
-                                <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">K</td>
-                            </tr>
-                            <tr>
-                                <td style="border: 1px solid #ccc; padding: 4px;">Air Density x Specific Heat (空氣密度×比熱)</td>
-                                <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">${data.equipment_sizing.airflow.air_density_cp}</td>
-                                <td style="border: 1px solid #ccc; padding: 4px; text-align: center;"></td>
-                            </tr>
-                            <tr style="background: #fff3cd;">
-                                <td style="border: 1px solid #ccc; padding: 4px; font-weight: bold;">Required Fresh Air Flow (需求新風量)</td>
-                                <td style="border: 1px solid #ccc; padding: 4px; text-align: center; font-weight: bold;">${data.equipment_sizing.airflow.required_cmh}</td>
-                                <td style="border: 1px solid #ccc; padding: 4px; text-align: center; font-weight: bold;">CMH</td>
-                            </tr>
-                            
-                            <!-- C. Exhaust Air Flow Rate (僅當需要排風時顯示) -->
-                            ${data.equipment_sizing.exhaust.required_cmh > 0 ? `
-                            <tr style="background: #fff3cd;">
-                                <td colspan="3" style="border: 1px solid #ccc; padding: 4px; font-weight: bold;">C. Exhaust Air Flow Rate (排風量計算)</td>
-                            </tr>
-                            <tr>
-                                <td style="border: 1px solid #ccc; padding: 4px;">Volume (空間體積)</td>
-                                <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">${data.equipment_sizing.exhaust.volume_m3}</td>
-                                <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">m3</td>
-                            </tr>
-                            <tr>
-                                <td style="border: 1px solid #ccc; padding: 4px;">Air Change Rate (排風量標準)</td>
-                                <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">${data.equipment_sizing.exhaust.ach}</td>
-                                <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">ACH</td>
-                            </tr>
-                            <tr style="background: #fff3cd;">
-                                <td style="border: 1px solid #ccc; padding: 4px; font-weight: bold;">Required Exhaust Air Flow (需求排風量)</td>
-                                <td style="border: 1px solid #ccc; padding: 4px; text-align: center; font-weight: bold;">${data.equipment_sizing.exhaust.required_cmh}</td>
-                                <td style="border: 1px solid #ccc; padding: 4px; text-align: center; font-weight: bold;">CMH</td>
-                            </tr>
-                            ` : ''}
-                        </table>
-                    </div>`;
-
-                reportContainer.innerHTML = htmlContent;
-                const canvas = await html2canvas(reportContainer, { scale: 2, useCORS: true });
-                const imgData = canvas.toDataURL('image/png');
-                const imgProps = doc.getImageProperties(imgData);
-                const pdfWidth = PAGE_WIDTH - (MARGIN * 2);
-                const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
+                // 策略 B：每個房間從新頁開始
                 if (i > 0) doc.addPage();
-                doc.addImage(imgData, 'PNG', MARGIN, MARGIN, pdfWidth, pdfHeight);
+                
+                // 生成 Canvas
+                const canvas = await this.generateHVACReportCanvas(item, projectName, i, HVACModule.items.length);
+                const imgData = canvas.toDataURL('image/png');
+                
+                // 計算圖片在 PDF 中的實際高度
+                const imgHeight = canvas.height * (PAGE_WIDTH / canvas.width);
+                
+                // 判斷是否需要拆分（如果單個房間內容超過一頁）
+                if (imgHeight > PAGE_HEIGHT) {
+                    // 內容超過一頁，需要拆分
+                    // 簡化處理：縮小以適應一頁（實際項目中可能需要更複雜的拆分邏輯）
+                    const scaleFactor = PAGE_HEIGHT / imgHeight;
+                    const scaledWidth = PAGE_WIDTH * scaleFactor;
+                    const scaledHeight = PAGE_HEIGHT;
+                    
+                    doc.addImage(imgData, 'PNG', (PAGE_WIDTH - scaledWidth) / 2, 0, scaledWidth, scaledHeight);
+                } else {
+                    // 內容未超過一頁，正常顯示
+                    doc.addImage(imgData, 'PNG', 0, 0, PAGE_WIDTH, imgHeight);
+                }
             }
-            document.body.removeChild(reportContainer);
-            const projectName = this.state.projects[this.state.currentProjectIdx]?.name || "Untitled";
+            
+            // 統一加頁碼（複用電力報告的邏輯）
+            this.addPageNumbers(doc);
+            
+            // 保存 PDF
             doc.save(`${projectName}_HVAC_Report.pdf`);
+            
         } catch (error) {
             console.error("PDF Error:", error);
-            this.showCustomModal("錯誤", "報告生成失敗", false);
+            this.showCustomModal("錯誤", "報告生成失敗: " + error.message, false);
         } finally {
             this.showLoading(false);
         }
