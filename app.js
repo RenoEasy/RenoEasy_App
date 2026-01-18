@@ -2047,7 +2047,7 @@ const RenoApp = {
         y += rowHeight;
         
         // C. Fresh Air Requirement (新風需求)
-        if (data.equipment_sizing.fresh_air.required_cmh > 0) {
+        
         this.drawEquipmentRow(ctx, margin, tableWidth, y, 'C. Fresh Air Requirement (新風需求)', '', '', '#f9f9f9', true);
         y += rowHeight;
         
@@ -2059,7 +2059,7 @@ const RenoApp = {
         
         this.drawEquipmentRow(ctx, margin, tableWidth, y, 'Required Fresh Air (需求新風量)', data.equipment_sizing.fresh_air.required_cmh, 'CMH', COLOR_GREEN, true);
         y += rowHeight;
-        }
+        
         
         // D. Exhaust Air Flow Rate (排風量計算)
         if (data.equipment_sizing.exhaust.required_cmh > 0) {
