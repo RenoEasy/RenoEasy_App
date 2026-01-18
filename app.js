@@ -1764,11 +1764,8 @@ const RenoApp = {
             
             // ====== 標題區 ======
             ctx.fillStyle = COLOR_PRIMARY;
-            ctx.fillRect(MARGIN, y, TABLE_WIDTH, 100);
-            
-            ctx.fillStyle = '#ffffff';
             ctx.font = 'bold 48px Arial';
-            ctx.fillText('空調負荷計算書 (AC Load Calculation)', MARGIN + 20, y + 65);
+            ctx.fillText('空調負荷及通風量計算書 (AC Load & Ventilation Calculation)', MARGIN + 20, y + 65);
             
             y += 110;
             ctx.fillStyle = COLOR_TEXT;
@@ -1872,9 +1869,27 @@ const RenoApp = {
             ctx.fillStyle = '#000000';
             ctx.fillText(row.en, col1, y + 33);
             ctx.fillText(row.zh, col2, y + 33);
-            ctx.fillText(String(row.summer), col3, y + 33);
-            ctx.fillText(String(row.winter), col4, y + 33);
-            ctx.fillText(row.unit, col5, y + 33);
+            
+            // 判斷是否需要合併 Summer/Winter 欄
+            // 從第3行 (Indoor Temperature) 開始到最後，合併 Summer/Winter 欄
+            if (idx >= 2) {
+                // 繪製合併後的值（跨 Summer + Winter 欄）
+                const mergedColStart = col3;
+                const mergedColEnd = col5;
+                ctx.fillText(String(row.summer), mergedColStart, y + 33);
+                ctx.fillText(row.unit, col5, y + 33);
+                
+                // 繪製分隔線（僅在 Summer 和 Unit 之間）
+                ctx.beginPath();
+                ctx.moveTo(col5 - 10, y);
+                ctx.lineTo(col5 - 10, y + rowHeight);
+                ctx.stroke();
+            } else {
+                // 前兩行保持原樣（分開顯示 Summer 和 Winter）
+                ctx.fillText(String(row.summer), col3, y + 33);
+                ctx.fillText(String(row.winter), col4, y + 33);
+                ctx.fillText(row.unit, col5, y + 33);
+            }
             
             y += rowHeight;
         });
@@ -1948,15 +1963,6 @@ const RenoApp = {
         const rowHeight = 50;
         
         rows.forEach((row) => {
-            // 背景顏色
-            if (row.isHighlight) {
-                ctx.fillStyle = COLOR_HIGHLIGHT;
-            } else if (row.isBold) {
-                ctx.fillStyle = '#f9f9f9';
-            } else {
-                ctx.fillStyle = '#ffffff';
-            }
-            ctx.fillRect(margin, y, tableWidth, rowHeight);
             
             // 邊框
             ctx.strokeStyle = COLOR_BORDER;
@@ -2017,8 +2023,9 @@ const RenoApp = {
         
         const rowHeight = 50;
         
+        
         // A. Cooling Capacity
-        this.drawEquipmentRow(ctx, margin, tableWidth, y, 'A. Cooling Capacity (製冷量)', '', '', COLOR_BLUE, true);
+        this.drawEquipmentRow(ctx, margin, tableWidth, y, 'A. Cooling Capacity (製冷量)', '', '', '#f9f9f9', true);
         y += rowHeight;
         
         this.drawEquipmentRow(ctx, margin, tableWidth, y, 'Grand Total Load (峰值總負荷)', data.equipment_sizing.cooling.grand_total_w, 'W', '#ffffff', false);
@@ -2031,7 +2038,7 @@ const RenoApp = {
         y += rowHeight;
         
         // B. Fresh Air Flow Rate
-        this.drawEquipmentRow(ctx, margin, tableWidth, y, 'B. Fresh Air Flow Rate (新風量計算)', '', '', COLOR_BLUE, true);
+        this.drawEquipmentRow(ctx, margin, tableWidth, y, 'B. Fresh Air Flow Rate (新風量計算)', '', '', '#f9f9f9', true);
         y += rowHeight;
         
         this.drawEquipmentRow(ctx, margin, tableWidth, y, 'Room Sensible Load (房間顯熱)', data.equipment_sizing.airflow.room_sensible_w, 'W', '#ffffff', false);
@@ -2048,7 +2055,7 @@ const RenoApp = {
         
         // C. Exhaust Air Flow Rate (條件顯示)
         if (data.equipment_sizing.exhaust.required_cmh > 0) {
-            this.drawEquipmentRow(ctx, margin, tableWidth, y, 'C. Exhaust Air Flow Rate (排風量計算)', '', '', COLOR_YELLOW, true);
+            this.drawEquipmentRow(ctx, margin, tableWidth, y, 'C. Exhaust Air Flow Rate (排風量計算)', '', '', '#f9f9f9', true);
             y += rowHeight;
             
             this.drawEquipmentRow(ctx, margin, tableWidth, y, 'Volume (空間體積)', data.equipment_sizing.exhaust.volume_m3, 'm3', '#ffffff', false);
