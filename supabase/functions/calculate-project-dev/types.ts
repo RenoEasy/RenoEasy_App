@@ -127,6 +127,12 @@ export interface DetailedLoad {
       required_hp: number;
       rounded_hp: number;
     };
+    fresh_air: {
+      number_of_people: number;
+      fresh_air_rate: number;
+      required_ls: number;
+      required_cmh: number;
+    };
     airflow: {
       room_sensible_w: number;
       supply_air_dt: number;      // 10
