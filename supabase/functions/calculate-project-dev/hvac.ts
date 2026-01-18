@@ -334,6 +334,12 @@ function calculateSpace(input: HVACInput): HVACResult | null {
           required_hp: parseFloat(required_cooling_hp.toFixed(2)),
           rounded_hp: rounded_hp
         },
+        fresh_air: {
+          number_of_people: people,
+          fresh_air_rate: fresh_air_rate,
+          required_ls: Math.round(total_fresh_air_ls),
+          required_cmh: Math.round(total_fresh_air_ls * 3.6)
+        },
         airflow: {
           room_sensible_w: Math.round(sub_total_sensible),
           supply_air_dt: 10,

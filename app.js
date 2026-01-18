@@ -1767,7 +1767,7 @@ const RenoApp = {
             ctx.font = 'bold 48px Arial';
             ctx.fillText('空調負荷及通風量計算書 (AC Load & Ventilation Calculation)', MARGIN + 20, y + 65);
             
-            y += 110;
+            y += 80;
             ctx.fillStyle = COLOR_TEXT;
             ctx.font = '32px Arial';
             ctx.fillText(`Project: ${projectName} | Room: ${item.label}`, MARGIN + 20, y + 30);
@@ -1871,21 +1871,13 @@ const RenoApp = {
             ctx.fillText(row.zh, col2, y + 33);
             
             // 判斷是否需要合併 Summer/Winter 欄
-            // 從第3行 (Indoor Temperature) 開始到最後，合併 Summer/Winter 欄
+            // 從第3行 (Indoor Temperature, idx=2) 開始合併
             if (idx >= 2) {
-                // 繪製合併後的值（跨 Summer + Winter 欄）
-                const mergedColStart = col3;
-                const mergedColEnd = col5;
-                ctx.fillText(String(row.summer), mergedColStart, y + 33);
+                // 合併顯示（跨 Summer + Winter 欄）
+                ctx.fillText(String(row.summer), col3, y + 33);
                 ctx.fillText(row.unit, col5, y + 33);
-                
-                // 繪製分隔線（僅在 Summer 和 Unit 之間）
-                ctx.beginPath();
-                ctx.moveTo(col5 - 10, y);
-                ctx.lineTo(col5 - 10, y + rowHeight);
-                ctx.stroke();
             } else {
-                // 前兩行保持原樣（分開顯示 Summer 和 Winter）
+                // 前兩行保持分開顯示
                 ctx.fillText(String(row.summer), col3, y + 33);
                 ctx.fillText(String(row.winter), col4, y + 33);
                 ctx.fillText(row.unit, col5, y + 33);
@@ -2037,8 +2029,21 @@ const RenoApp = {
         this.drawEquipmentRow(ctx, margin, tableWidth, y, 'Required Cooling Capacity (需求製冷量)', data.equipment_sizing.cooling.required_kw, 'kW', COLOR_GREEN, true);
         y += rowHeight;
         
-        // B. Fresh Air Flow Rate
-        this.drawEquipmentRow(ctx, margin, tableWidth, y, 'B. Fresh Air Flow Rate (新風量計算)', '', '', '#f9f9f9', true);
+        // B. Fresh Air Requirement (新風需求)
+        this.drawEquipmentRow(ctx, margin, tableWidth, y, 'B. Fresh Air Requirement (新風需求)', '', '', '#f9f9f9', true);
+        y += rowHeight;
+        
+        this.drawEquipmentRow(ctx, margin, tableWidth, y, 'Number of People (人數)', data.equipment_sizing.fresh_air.number_of_people, 'person', '#ffffff', false);
+        y += rowHeight;
+        
+        this.drawEquipmentRow(ctx, margin, tableWidth, y, 'Fresh Air Rate (人均新風)', data.equipment_sizing.fresh_air.fresh_air_rate, 'L/s/person', '#ffffff', false);
+        y += rowHeight;
+        
+        this.drawEquipmentRow(ctx, margin, tableWidth, y, 'Required Fresh Air (需求新風量)', data.equipment_sizing.fresh_air.required_cmh, 'CMH', COLOR_GREEN, true);
+        y += rowHeight;
+        
+        // C. Supply Air Flow Rate (送風量計算)
+        this.drawEquipmentRow(ctx, margin, tableWidth, y, 'C. Supply Air Flow Rate (送風量計算)', '', '', '#f9f9f9', true);
         y += rowHeight;
         
         this.drawEquipmentRow(ctx, margin, tableWidth, y, 'Room Sensible Load (房間顯熱)', data.equipment_sizing.airflow.room_sensible_w, 'W', '#ffffff', false);
@@ -2050,12 +2055,12 @@ const RenoApp = {
         this.drawEquipmentRow(ctx, margin, tableWidth, y, 'Air Density x Specific Heat (空氣密度×比熱)', data.equipment_sizing.airflow.air_density_cp, '', '#ffffff', false);
         y += rowHeight;
         
-        this.drawEquipmentRow(ctx, margin, tableWidth, y, 'Required Fresh Air Flow (需求新風量)', data.equipment_sizing.airflow.required_cmh, 'CMH', COLOR_GREEN, true);
+        this.drawEquipmentRow(ctx, margin, tableWidth, y, 'Required Supply Air Flow (需求送風量)', data.equipment_sizing.airflow.required_cmh, 'CMH', COLOR_GREEN, true);
         y += rowHeight;
         
-        // C. Exhaust Air Flow Rate (條件顯示)
+        // D. Exhaust Air Flow Rate (排風量計算)
         if (data.equipment_sizing.exhaust.required_cmh > 0) {
-            this.drawEquipmentRow(ctx, margin, tableWidth, y, 'C. Exhaust Air Flow Rate (排風量計算)', '', '', '#f9f9f9', true);
+            this.drawEquipmentRow(ctx, margin, tableWidth, y, 'D. Exhaust Air Flow Rate (排風量計算)', '', '', '#f9f9f9', true);
             y += rowHeight;
             
             this.drawEquipmentRow(ctx, margin, tableWidth, y, 'Volume (空間體積)', data.equipment_sizing.exhaust.volume_m3, 'm3', '#ffffff', false);
