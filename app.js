@@ -26,13 +26,18 @@ const REPORT_SCHEMA = {
                 winterValue: "7"
             },
             { 
-                label_en: "Specific Enthalpy of Outdoor Air", label_zh: "室外焓值", unit: "kJ/kg", 
-                getValue: (d) => d.design_params.outdoor_enthalpy.toFixed(2),
-                winterValue: "--"
+                label_en: "Specific Enthalpy of Indoor Air", label_zh: "設計室內焓值", unit: "kJ/kg", 
+                getValue: (d) => d.design_params.indoor_enthalpy.toFixed(2),
+                winterValue: ""
             },
             { 
-                label_en: "Indoor Temperature", label_zh: "設計室內溫度", unit: "°C", 
-                getValue: (d) => d.design_params.indoor_temp,
+                label_en: "Area", label_zh: "空間面積", unit: "m²", 
+                getValue: (d, item) => item.A,
+                winterValue: ""
+            },
+            { 
+                label_en: "Fresh Air Rate", label_zh: "新風量標準(Min.)", unit: "L/s/person", 
+                getValue: (d) => d.design_params.fresh_air_rate,
                 winterValue: ""
             },
             { 
@@ -55,11 +60,7 @@ const REPORT_SCHEMA = {
                 getValue: (d) => d.design_params.exhaust_air_rate,
                 winterValue: ""
             },
-            { 
-                label_en: "Occupancy Density", label_zh: "人員密度", unit: "m²/person", 
-                getValue: (d) => d.design_params.occupancy_density,
-                winterValue: ""
-            },
+            
             { 
                 label_en: "Lighting", label_zh: "燈光密度", unit: "W/m²", 
                 getValue: (d) => d.design_params.lighting_density,
@@ -79,43 +80,35 @@ const REPORT_SCHEMA = {
         headers: ["Load Component (負荷分項)", "Sensible (W)", "Latent (W)", "Total (W)"],
         rows: [
             {
-                label: "1. Glass Solar Radiation (玻璃輻射)",
-                sensible: (d) => d.load_summary.glass_radiation.sensible,
+                label: "1. Envelope Load (圍護結構負荷)",
+                sensible: (d) => d.load_summary.glass_radiation.sensible + 
+                                 d.load_summary.glass_conduction.sensible + 
+                                 d.load_summary.wall_roof.sensible,
                 latent: () => "-",
-                total: (d) => d.load_summary.glass_radiation.total
+                total: (d) => d.load_summary.glass_radiation.total + 
+                              d.load_summary.glass_conduction.total + 
+                              d.load_summary.wall_roof.total
             },
             {
-                label: "2. Glass Conduction (玻璃傳導)",
-                sensible: (d) => d.load_summary.glass_conduction.sensible,
-                latent: () => "-",
-                total: (d) => d.load_summary.glass_conduction.total
-            },
-            {
-                label: "3. Wall/Roof Conduction (外牆/屋頂)",
-                sensible: (d) => d.load_summary.wall_roof.sensible,
-                latent: () => "-",
-                total: (d) => d.load_summary.wall_roof.total
-            },
-            {
-                label: "4. People (人員)",
+                label: "2. People (人員)",
                 sensible: (d) => d.load_summary.people.sensible,
                 latent: (d) => d.load_summary.people.latent,
                 total: (d) => d.load_summary.people.total
             },
             {
-                label: "5. Lighting (燈光)",
+                label: "3. Lighting (燈光)",
                 sensible: (d) => d.load_summary.lighting.sensible,
                 latent: () => "-",
                 total: (d) => d.load_summary.lighting.total
             },
             {
-                label: "6. Equipment (設備)",
+                label: "4. Equipment (設備)",
                 sensible: (d) => d.load_summary.equipment.sensible,
                 latent: () => "-",
                 total: (d) => d.load_summary.equipment.total
             },
             {
-                label: "7. Fresh Air Load (新風負荷)",
+                label: "5. Fresh Air Load (新風負荷)",
                 sensible: (d) => d.load_summary.fresh_air.sensible,
                 latent: (d) => d.load_summary.fresh_air.latent,
                 total: (d) => d.load_summary.fresh_air.total
@@ -1768,11 +1761,13 @@ const RenoApp = {
                 if (!item.detailedLoad) continue;
                 const data = item.detailedLoad;
 
+                const projectName = this.state.projects[this.state.currentProjectIdx]?.name || "Untitled";
+                
                 let htmlContent = `
                     <div style="font-family: sans-serif; color: #000;">
                         <div style="border-bottom: 2px solid #003399; padding-bottom: 10px; margin-bottom: 20px;">
                             <h2 style="color: #003399; margin: 0;">空調負荷計算書 (AC Load Calculation)</h2>
-                            <p style="margin: 5px 0 0 0; font-size: 14px;">Project: RenoEasy Auto-Gen | Room: ${item.label}</p>
+                            <p style="margin: 5px 0 0 0; font-size: 14px;">Project: ${projectName} | Room: ${item.label}</p>
                         </div>
                         <h3 style="background: #003399; color: white; padding: 5px 10px; font-size: 14px; margin: 0;">1. Design Parameters (設計參數)</h3>
                         <table style="width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 20px;">
@@ -1787,7 +1782,7 @@ const RenoApp = {
                                 <tr>
                                     <td style="border: 1px solid #ccc; padding: 4px;">${row.label_en}</td>
                                     <td style="border: 1px solid #ccc; padding: 4px;">${row.label_zh}</td>
-                                    <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">${row.getValue(data)}</td>
+                                    <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">${row.getValue(data, item)}</td>
                                     <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">${row.winterValue}</td>
                                     <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">${row.unit}</td>
                                 </tr>`).join('')}
@@ -1815,7 +1810,8 @@ const RenoApp = {
                         <div style="margin-top: 20px; padding: 10px; border: 1px solid #003399; background: #f8f9fa;">
                             <strong>Equipment Sizing Suggestion:</strong><br>
                             Required Cooling Capacity: <b>${data.equipment_sizing.cooling.required_kw} kW</b> (${data.equipment_sizing.cooling.rounded_hp} HP)<br>
-                            Fresh Air Required: <b>${data.equipment_sizing.airflow.required_cmh} CMH</b>
+                            Fresh Air Required: <b>${data.equipment_sizing.airflow.required_cmh} CMH</b><br>
+                            ${data.equipment_sizing.exhaust.required_cmh > 0 ? `Exhaust Air Required: <b>${data.equipment_sizing.exhaust.required_cmh} CMH</b>` : ''}
                         </div>
                     </div>`;
 
@@ -1830,7 +1826,8 @@ const RenoApp = {
                 doc.addImage(imgData, 'PNG', MARGIN, MARGIN, pdfWidth, pdfHeight);
             }
             document.body.removeChild(reportContainer);
-            doc.save("RenoEasy_HVAC_Report.pdf");
+            const projectName = this.state.projects[this.state.currentProjectIdx]?.name || "Untitled";
+            doc.save(`${projectName}_HVAC_Report.pdf`);
         } catch (error) {
             console.error("PDF Error:", error);
             this.showCustomModal("錯誤", "報告生成失敗", false);
