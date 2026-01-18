@@ -2029,21 +2029,9 @@ const RenoApp = {
         this.drawEquipmentRow(ctx, margin, tableWidth, y, 'Required Cooling Capacity (需求製冷量)', data.equipment_sizing.cooling.required_kw, 'kW', COLOR_GREEN, true);
         y += rowHeight;
         
-        // B. Fresh Air Requirement (新風需求)
-        this.drawEquipmentRow(ctx, margin, tableWidth, y, 'B. Fresh Air Requirement (新風需求)', '', '', '#f9f9f9', true);
-        y += rowHeight;
         
-        this.drawEquipmentRow(ctx, margin, tableWidth, y, 'Number of People (人數)', data.equipment_sizing.fresh_air.number_of_people, 'person', '#ffffff', false);
-        y += rowHeight;
-        
-        this.drawEquipmentRow(ctx, margin, tableWidth, y, 'Fresh Air Rate (人均新風)', data.equipment_sizing.fresh_air.fresh_air_rate, 'L/s/person', '#ffffff', false);
-        y += rowHeight;
-        
-        this.drawEquipmentRow(ctx, margin, tableWidth, y, 'Required Fresh Air (需求新風量)', data.equipment_sizing.fresh_air.required_cmh, 'CMH', COLOR_GREEN, true);
-        y += rowHeight;
-        
-        // C. Supply Air Flow Rate (送風量計算)
-        this.drawEquipmentRow(ctx, margin, tableWidth, y, 'C. Supply Air Flow Rate (送風量計算)', '', '', '#f9f9f9', true);
+        // B. Supply Air Flow Rate (送風量計算)
+        this.drawEquipmentRow(ctx, margin, tableWidth, y, 'B. Supply Air Flow Rate (送風量計算)', '', '', '#f9f9f9', true);
         y += rowHeight;
         
         this.drawEquipmentRow(ctx, margin, tableWidth, y, 'Room Sensible Load (房間顯熱)', data.equipment_sizing.airflow.room_sensible_w, 'W', '#ffffff', false);
@@ -2056,6 +2044,19 @@ const RenoApp = {
         y += rowHeight;
         
         this.drawEquipmentRow(ctx, margin, tableWidth, y, 'Required Supply Air Flow (需求送風量)', data.equipment_sizing.airflow.required_cmh, 'CMH', COLOR_GREEN, true);
+        y += rowHeight;
+        
+        // C. Fresh Air Requirement (新風需求)
+        this.drawEquipmentRow(ctx, margin, tableWidth, y, 'C. Fresh Air Requirement (新風需求)', '', '', '#f9f9f9', true);
+        y += rowHeight;
+        
+        this.drawEquipmentRow(ctx, margin, tableWidth, y, 'Number of People (人數)', data.equipment_sizing.fresh_air.number_of_people, 'person', '#ffffff', false);
+        y += rowHeight;
+        
+        this.drawEquipmentRow(ctx, margin, tableWidth, y, 'Fresh Air Rate (人均新風)', data.equipment_sizing.fresh_air.fresh_air_rate, 'L/s/person', '#ffffff', false);
+        y += rowHeight;
+        
+        this.drawEquipmentRow(ctx, margin, tableWidth, y, 'Required Fresh Air (需求新風量)', data.equipment_sizing.fresh_air.required_cmh, 'CMH', COLOR_GREEN, true);
         y += rowHeight;
         
         // D. Exhaust Air Flow Rate (排風量計算)
