@@ -41,6 +41,11 @@ const REPORT_SCHEMA = {
                 winterValue: ""
             },
             { 
+                label_en: "Indoor Temperature", label_zh: "設計室內溫度", unit: "°C", 
+                getValue: (d) => d.design_params.indoor_temp,
+                winterValue: ""
+            },
+            { 
                 label_en: "Indoor RH", label_zh: "設計室內濕度", unit: "RH", 
                 getValue: (d) => d.design_params.indoor_rh,
                 winterValue: ""
@@ -1807,12 +1812,81 @@ const RenoApp = {
                                 </tr>`;
                             }).join('')}
                         </table>
-                        <div style="margin-top: 20px; padding: 10px; border: 1px solid #003399; background: #f8f9fa;">
-                            <strong>Equipment Sizing Suggestion:</strong><br>
-                            Required Cooling Capacity: <b>${data.equipment_sizing.cooling.required_kw} kW</b> (${data.equipment_sizing.cooling.rounded_hp} HP)<br>
-                            Fresh Air Required: <b>${data.equipment_sizing.airflow.required_cmh} CMH</b><br>
-                            ${data.equipment_sizing.exhaust.required_cmh > 0 ? `Exhaust Air Required: <b>${data.equipment_sizing.exhaust.required_cmh} CMH</b>` : ''}
-                        </div>
+                        <h3 style="background: #003399; color: white; padding: 5px 10px; font-size: 14px; margin: 20px 0 0 0;">3. Equipment Sizing (設備選型)</h3>
+                        <table style="width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 20px;">
+                            <tr style="background: #f0f0f0;">
+                                <th style="border: 1px solid #ccc; padding: 4px; text-align: left;">Item</th>
+                                <th style="border: 1px solid #ccc; padding: 4px; text-align: center;">Value</th>
+                                <th style="border: 1px solid #ccc; padding: 4px; text-align: center;">Unit</th>
+                            </tr>
+                            
+                            <!-- A. Cooling Capacity -->
+                            <tr style="background: #e6f7ff;">
+                                <td colspan="3" style="border: 1px solid #ccc; padding: 4px; font-weight: bold;">A. Cooling Capacity (製冷量)</td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid #ccc; padding: 4px;">Grand Total Load (峰值總負荷)</td>
+                                <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">${data.equipment_sizing.cooling.grand_total_w}</td>
+                                <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">W</td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid #ccc; padding: 4px;">Safety Factor (安全係數)</td>
+                                <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">${data.equipment_sizing.cooling.safety_factor}%</td>
+                                <td style="border: 1px solid #ccc; padding: 4px; text-align: center;"></td>
+                            </tr>
+                            <tr style="background: #d4edda;">
+                                <td style="border: 1px solid #ccc; padding: 4px; font-weight: bold;">Required Cooling Capacity (需求製冷量)</td>
+                                <td style="border: 1px solid #ccc; padding: 4px; text-align: center; font-weight: bold;">${data.equipment_sizing.cooling.required_kw}</td>
+                                <td style="border: 1px solid #ccc; padding: 4px; text-align: center; font-weight: bold;">kW</td>
+                            </tr>
+                            
+                            <!-- B. Fresh Air Flow Rate -->
+                            <tr style="background: #e6f7ff;">
+                                <td colspan="3" style="border: 1px solid #ccc; padding: 4px; font-weight: bold;">B. Fresh Air Flow Rate (新風量計算)</td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid #ccc; padding: 4px;">Room Sensible Load (房間顯熱)</td>
+                                <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">${data.equipment_sizing.airflow.room_sensible_w}</td>
+                                <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">W</td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid #ccc; padding: 4px;">Supply Air dT (送風溫差)</td>
+                                <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">${data.equipment_sizing.airflow.supply_air_dt}</td>
+                                <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">K</td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid #ccc; padding: 4px;">Air Density x Specific Heat (空氣密度×比熱)</td>
+                                <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">${data.equipment_sizing.airflow.air_density_cp}</td>
+                                <td style="border: 1px solid #ccc; padding: 4px; text-align: center;"></td>
+                            </tr>
+                            <tr style="background: #fff3cd;">
+                                <td style="border: 1px solid #ccc; padding: 4px; font-weight: bold;">Required Fresh Air Flow (需求新風量)</td>
+                                <td style="border: 1px solid #ccc; padding: 4px; text-align: center; font-weight: bold;">${data.equipment_sizing.airflow.required_cmh}</td>
+                                <td style="border: 1px solid #ccc; padding: 4px; text-align: center; font-weight: bold;">CMH</td>
+                            </tr>
+                            
+                            <!-- C. Exhaust Air Flow Rate (僅當需要排風時顯示) -->
+                            ${data.equipment_sizing.exhaust.required_cmh > 0 ? `
+                            <tr style="background: #fff3cd;">
+                                <td colspan="3" style="border: 1px solid #ccc; padding: 4px; font-weight: bold;">C. Exhaust Air Flow Rate (排風量計算)</td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid #ccc; padding: 4px;">Volume (空間體積)</td>
+                                <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">${data.equipment_sizing.exhaust.volume_m3}</td>
+                                <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">m3</td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid #ccc; padding: 4px;">Air Change Rate (排風量標準)</td>
+                                <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">${data.equipment_sizing.exhaust.ach}</td>
+                                <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">ACH</td>
+                            </tr>
+                            <tr style="background: #fff3cd;">
+                                <td style="border: 1px solid #ccc; padding: 4px; font-weight: bold;">Required Exhaust Air Flow (需求排風量)</td>
+                                <td style="border: 1px solid #ccc; padding: 4px; text-align: center; font-weight: bold;">${data.equipment_sizing.exhaust.required_cmh}</td>
+                                <td style="border: 1px solid #ccc; padding: 4px; text-align: center; font-weight: bold;">CMH</td>
+                            </tr>
+                            ` : ''}
+                        </table>
                     </div>`;
 
                 reportContainer.innerHTML = htmlContent;
