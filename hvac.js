@@ -74,7 +74,7 @@ const HVACModule = {
             console.log("呼叫 HVAC 雲端計算...");
 
             // E. 發送請求 (Action: hvac)
-            const { data, error } = await supabaseClient.functions.invoke('calculate-project', {
+            const { data, error } = await supabaseClient.functions.invoke('calculate-project-dev', {
                 body: { 
                     action: 'hvac',         // 告訴後端這是 HVAC 請求
                     inputs: [inputPayload]  // 放入陣列
