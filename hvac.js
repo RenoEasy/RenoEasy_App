@@ -86,14 +86,20 @@ const HVACModule = {
 
             const cloudResult = data[0]; // 取回結果
 
+            // ... (上面是 const cloudResult = data[0];)
+
             // F. 格式化顯示 (加上樣式)
             // 後端回傳的是純文字，前端負責「化妝」
             const displayItem = {
                 id: Date.now(),
+                
+                // ✅ [關鍵修復] 必須加入這一行！否則 PDF 報告無法生成！
+                detailedLoad: cloudResult.detailedLoad, 
+
                 label: cloudResult.label,
                 A: cloudResult.area,
                 Ppl: cloudResult.people,
-                
+                                 
                 // 冷量樣式 (藍色粗體)
                 strCooling: cloudResult.coolingHP > 0 
                     ? `<span style="font-weight:700; color:#2c5282;">${cloudResult.coolingHPDisplay}</span>` 

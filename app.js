@@ -11,6 +11,135 @@ const SUPABASE_KEY = 'sb_publishable_JV7PTUNvhawsCVANpQ8uNg_zV8qHNAQ';
 // ⚠️ 注意：這裡改名叫 supabaseClient，避免跟工具箱名字打架
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 // ==========================================
+// ============================================================================
+// REPORT SCHEMA - 中英雙語報告配置
+// ============================================================================
+const REPORT_SCHEMA = {
+    // 1. 設計參數 (Design Parameters)
+    designParams: {
+        title: "1. Design Parameters (設計參數)",
+        headers: ["Item", "Description", "Summer", "Winter", "Unit"],
+        rows: [
+            { 
+                label_en: "Outdoor Condition", label_zh: "室外設計工況", unit: "°C DB/WB", 
+                getValue: (d) => `${d.design_params.outdoor_temp_db} / ${d.design_params.outdoor_temp_wb}`,
+                winterValue: "7"
+            },
+            { 
+                label_en: "Specific Enthalpy of Outdoor Air", label_zh: "室外焓值", unit: "kJ/kg", 
+                getValue: (d) => d.design_params.outdoor_enthalpy.toFixed(2),
+                winterValue: "--"
+            },
+            { 
+                label_en: "Indoor Temperature", label_zh: "設計室內溫度", unit: "°C", 
+                getValue: (d) => d.design_params.indoor_temp,
+                winterValue: ""
+            },
+            { 
+                label_en: "Indoor RH", label_zh: "設計室內濕度", unit: "RH", 
+                getValue: (d) => d.design_params.indoor_rh,
+                winterValue: ""
+            },
+            { 
+                label_en: "Specific Enthalpy of Indoor Air", label_zh: "設計室內焓值", unit: "kJ/kg", 
+                getValue: (d) => d.design_params.indoor_enthalpy.toFixed(2),
+                winterValue: ""
+            },
+            { 
+                label_en: "Fresh Air Rate", label_zh: "新風量標準(Min.)", unit: "L/s/person", 
+                getValue: (d) => d.design_params.fresh_air_rate,
+                winterValue: ""
+            },
+            { 
+                label_en: "Exhaust Air Rate", label_zh: "排風量標準(Min.)", unit: "ACH", 
+                getValue: (d) => d.design_params.exhaust_air_rate,
+                winterValue: ""
+            },
+            { 
+                label_en: "Occupancy Density", label_zh: "人員密度", unit: "m²/person", 
+                getValue: (d) => d.design_params.occupancy_density,
+                winterValue: ""
+            },
+            { 
+                label_en: "Lighting", label_zh: "燈光密度", unit: "W/m²", 
+                getValue: (d) => d.design_params.lighting_density,
+                winterValue: ""
+            },
+            { 
+                label_en: "Equip.", label_zh: "設備密度", unit: "W/m²", 
+                getValue: (d) => d.design_params.equipment_density,
+                winterValue: ""
+            }
+        ]
+    },
+
+    // 2. 冷負荷摘要 (Cooling Load Summary)
+    loadSummary: {
+        title: "2. Cooling Load Summary (冷負荷摘要)",
+        headers: ["Load Component (負荷分項)", "Sensible (W)", "Latent (W)", "Total (W)"],
+        rows: [
+            {
+                label: "1. Glass Solar Radiation (玻璃輻射)",
+                sensible: (d) => d.load_summary.glass_radiation.sensible,
+                latent: () => "-",
+                total: (d) => d.load_summary.glass_radiation.total
+            },
+            {
+                label: "2. Glass Conduction (玻璃傳導)",
+                sensible: (d) => d.load_summary.glass_conduction.sensible,
+                latent: () => "-",
+                total: (d) => d.load_summary.glass_conduction.total
+            },
+            {
+                label: "3. Wall/Roof Conduction (外牆/屋頂)",
+                sensible: (d) => d.load_summary.wall_roof.sensible,
+                latent: () => "-",
+                total: (d) => d.load_summary.wall_roof.total
+            },
+            {
+                label: "4. People (人員)",
+                sensible: (d) => d.load_summary.people.sensible,
+                latent: (d) => d.load_summary.people.latent,
+                total: (d) => d.load_summary.people.total
+            },
+            {
+                label: "5. Lighting (燈光)",
+                sensible: (d) => d.load_summary.lighting.sensible,
+                latent: () => "-",
+                total: (d) => d.load_summary.lighting.total
+            },
+            {
+                label: "6. Equipment (設備)",
+                sensible: (d) => d.load_summary.equipment.sensible,
+                latent: () => "-",
+                total: (d) => d.load_summary.equipment.total
+            },
+            {
+                label: "7. Fresh Air Load (新風負荷)",
+                sensible: (d) => d.load_summary.fresh_air.sensible,
+                latent: (d) => d.load_summary.fresh_air.latent,
+                total: (d) => d.load_summary.fresh_air.total
+            },
+            {
+                label: "Sub-Total (Room Load)",
+                isBold: true,
+                sensible: (d) => d.load_summary.subtotal.sensible,
+                latent: (d) => d.load_summary.subtotal.latent,
+                total: (d) => d.load_summary.subtotal.total
+            },
+            {
+                label: "GRAND TOTAL (Peak Load)",
+                isBold: true,
+                isHighlight: true,
+                sensible: (d) => d.load_summary.grand_total.sensible,
+                latent: (d) => d.load_summary.grand_total.latent,
+                total: (d) => d.load_summary.grand_total.total
+            }
+        ]
+    }
+};
+
+
 
 const RenoApp = {
     // ... 下面不用動，直到 handleLogin ...
@@ -170,6 +299,7 @@ const RenoApp = {
                     this.generatePDFProcess();
                 }
             }, 1000);
+            
         }
     },
 
@@ -1568,9 +1698,152 @@ const RenoApp = {
             console.error(e);
             await this.showCustomModal("生成失敗 Error", "PDF 生成過程中發生錯誤: " + e.message, false);
         }
+    // ... (這上面是 generatePDFProcess 的結尾) ...
+    }, // <--- 確保這裡有逗號
+
+    // ✅ [新增] 缺失的 Loading 控制器 (修復 HVAC 報告報錯問題)
+    showLoading: function(isLoading) {
+        // 針對 HVAC 計算按鈕
+        const btnCalc = document.querySelector('.btn-hvac-calc');
+        // 針對 PDF 下載按鈕
+        const btnPremium = document.querySelector('.btn-premium');
+        
+        const loaderHtml = '<i class="fas fa-spinner fa-spin"></i> 處理中...';
+
+        if (isLoading) {
+            if (btnCalc) { 
+                btnCalc.dataset.old = btnCalc.innerHTML; 
+                btnCalc.innerHTML = loaderHtml; 
+                btnCalc.disabled = true; 
+            }
+            if (btnPremium) { 
+                btnPremium.dataset.old = btnPremium.innerHTML; 
+                btnPremium.innerHTML = loaderHtml; 
+                btnPremium.disabled = true; 
+            }
+        } else {
+            if (btnCalc) { 
+                btnCalc.innerHTML = btnCalc.dataset.old || '<i class="fas fa-calculator"></i> 開始計算 Calculate'; 
+                btnCalc.disabled = false; 
+            }
+            if (btnPremium) { 
+                btnPremium.innerHTML = btnPremium.dataset.old || '<i class="fas fa-unlock"></i> 立即解鎖 Unlock Now'; 
+                btnPremium.disabled = false; 
+            }
+        }
     },
 
-    
-}; // <--- 在這裡補上 RenoApp 的結束括號
+    // ========================================================================
+    // [已修復] HVAC PDF 報告生成 (HTML 轉圖片方案)
+    // ========================================================================
+    generateHVACReport: async function() {
+        if (!HVACModule.items || HVACModule.items.length === 0) {
+             this.showCustomModal("提示", "請先進行計算", false); return;
+        }
+        
+        const hasPremiumData = HVACModule.items.some(item => item.detailedLoad);
+        if (!hasPremiumData) {
+            this.showCustomModal("需要計算", "請先點擊「開始計算」獲取結果，然後再下載報告。", false); return;
+        }
 
+        // 這裡現在可以安全呼叫了，因為我們上面補上了定義
+        this.showLoading(true);
+
+        try {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4');
+            const PAGE_WIDTH = 210; const PAGE_HEIGHT = 297; const MARGIN = 10;
+
+            const reportContainer = document.createElement('div');
+            reportContainer.style.position = 'absolute';
+            reportContainer.style.top = '-9999px';
+            reportContainer.style.left = '0';
+            reportContainer.style.width = '800px';
+            reportContainer.style.backgroundColor = '#ffffff';
+            reportContainer.style.padding = '20px';
+            document.body.appendChild(reportContainer);
+
+            for (let i = 0; i < HVACModule.items.length; i++) {
+                const item = HVACModule.items[i];
+                if (!item.detailedLoad) continue;
+                const data = item.detailedLoad;
+
+                let htmlContent = `
+                    <div style="font-family: sans-serif; color: #000;">
+                        <div style="border-bottom: 2px solid #003399; padding-bottom: 10px; margin-bottom: 20px;">
+                            <h2 style="color: #003399; margin: 0;">空調負荷計算書 (AC Load Calculation)</h2>
+                            <p style="margin: 5px 0 0 0; font-size: 14px;">Project: RenoEasy Auto-Gen | Room: ${item.label}</p>
+                        </div>
+                        <h3 style="background: #003399; color: white; padding: 5px 10px; font-size: 14px; margin: 0;">1. Design Parameters (設計參數)</h3>
+                        <table style="width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 20px;">
+                            <tr style="background: #f0f0f0;">
+                                <th style="border: 1px solid #ccc; padding: 4px; text-align: left;">Item</th>
+                                <th style="border: 1px solid #ccc; padding: 4px; text-align: left;">Description</th>
+                                <th style="border: 1px solid #ccc; padding: 4px; text-align: center;">Summer</th>
+                                <th style="border: 1px solid #ccc; padding: 4px; text-align: center;">Winter</th>
+                                <th style="border: 1px solid #ccc; padding: 4px; text-align: center;">Unit</th>
+                            </tr>
+                            ${REPORT_SCHEMA.designParams.rows.map(row => `
+                                <tr>
+                                    <td style="border: 1px solid #ccc; padding: 4px;">${row.label_en}</td>
+                                    <td style="border: 1px solid #ccc; padding: 4px;">${row.label_zh}</td>
+                                    <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">${row.getValue(data)}</td>
+                                    <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">${row.winterValue}</td>
+                                    <td style="border: 1px solid #ccc; padding: 4px; text-align: center;">${row.unit}</td>
+                                </tr>`).join('')}
+                        </table>
+                        <h3 style="background: #003399; color: white; padding: 5px 10px; font-size: 14px; margin: 0;">2. Cooling Load Summary (冷負荷摘要)</h3>
+                        <div style="font-size: 12px; margin: 5px 0;">Peak Time Occurrence: ${data.load_summary.peak_hour}:00</div>
+                        <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+                            <tr style="background: #f0f0f0;">
+                                <th style="border: 1px solid #ccc; padding: 4px; text-align: left;">Load Component (負荷分項)</th>
+                                <th style="border: 1px solid #ccc; padding: 4px; text-align: right;">Sensible (W)</th>
+                                <th style="border: 1px solid #ccc; padding: 4px; text-align: right;">Latent (W)</th>
+                                <th style="border: 1px solid #ccc; padding: 4px; text-align: right;">Total (W)</th>
+                            </tr>
+                            ${REPORT_SCHEMA.loadSummary.rows.map(row => {
+                                const bgStyle = row.isHighlight ? 'background-color: #e6f7ff;' : '';
+                                const fontStyle = row.isBold ? 'font-weight: bold;' : '';
+                                return `<tr style="${bgStyle} ${fontStyle}">
+                                    <td style="border: 1px solid #ccc; padding: 4px;">${row.label}</td>
+                                    <td style="border: 1px solid #ccc; padding: 4px; text-align: right;">${row.sensible(data)}</td>
+                                    <td style="border: 1px solid #ccc; padding: 4px; text-align: right;">${row.latent(data)}</td>
+                                    <td style="border: 1px solid #ccc; padding: 4px; text-align: right;">${row.total(data)}</td>
+                                </tr>`;
+                            }).join('')}
+                        </table>
+                        <div style="margin-top: 20px; padding: 10px; border: 1px solid #003399; background: #f8f9fa;">
+                            <strong>Equipment Sizing Suggestion:</strong><br>
+                            Required Cooling Capacity: <b>${data.equipment_sizing.cooling.required_kw} kW</b> (${data.equipment_sizing.cooling.rounded_hp} HP)<br>
+                            Fresh Air Required: <b>${data.equipment_sizing.airflow.required_cmh} CMH</b>
+                        </div>
+                    </div>`;
+
+                reportContainer.innerHTML = htmlContent;
+                const canvas = await html2canvas(reportContainer, { scale: 2, useCORS: true });
+                const imgData = canvas.toDataURL('image/png');
+                const imgProps = doc.getImageProperties(imgData);
+                const pdfWidth = PAGE_WIDTH - (MARGIN * 2);
+                const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+                if (i > 0) doc.addPage();
+                doc.addImage(imgData, 'PNG', MARGIN, MARGIN, pdfWidth, pdfHeight);
+            }
+            document.body.removeChild(reportContainer);
+            doc.save("RenoEasy_HVAC_Report.pdf");
+        } catch (error) {
+            console.error("PDF Error:", error);
+            this.showCustomModal("錯誤", "報告生成失敗", false);
+        } finally {
+            this.showLoading(false);
+        }
+    }
+
+}; // <--- ✅ 正確關閉 RenoApp 物件 (這是檔案中最後一個大括號)
+
+// ========================================================================
+// 程式入口
+// ========================================================================
 window.onload = () => RenoApp.init();
+
+// ✅ 檔案結束 (不要再加任何括號了)

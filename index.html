@@ -12,7 +12,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -366,7 +367,7 @@
                     </button>
                 </div>
             </div>
-
+             
             <div class="sticky-input-bar">
                 <div class="input-group" style="flex: 1.4; min-width: 150px;">
                     <label>Device Type 設備類型</label>
@@ -530,6 +531,22 @@
                     </div>
                 </div>
             </div>
+
+            </div> 
+
+            <div class="action-bar" style="margin-top: 2rem; margin-bottom: 8rem; text-align: center;">
+                <button onclick="RenoApp.generateHVACReport()" class="btn btn-premium shadow-btn btn-hvac-calc">
+                    <i class="fas fa-file-pdf"></i> 生成 HVAC 計算報告 (PDF)
+                </button>
+                <p style="margin-top: 1rem; color: #718096; font-size: 0.9rem;">
+                    <i class="fas fa-info-circle"></i> 報告將包含詳細負荷計算書 (Detailed Load Schedule)
+                </p>
+            </div>
+            <div class="sticky-input-bar" style="border-top-color: var(--hvac-color);">
+            ```
+
+### 驗證
+修改並儲存後，重新整理網頁。你應該會在 HVAC 列表的下方看到那顆銀色的 **「生成 HVAC 計算報告 (PDF)」** 按鈕。
             
             <div class="sticky-input-bar" style="border-top-color: var(--hvac-color);">
                 <div class="input-group" style="flex: 1; min-width: 200px;">
