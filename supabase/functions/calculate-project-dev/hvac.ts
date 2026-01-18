@@ -231,7 +231,10 @@ function calculateSpace(input: HVACInput): HVACResult | null {
 
     // 5. Fresh Air
     const fresh_air_rate = 10; // L/s/person
-    const total_fresh_air_ls = people * fresh_air_rate;
+    
+    // ✅ [修正] 加入判斷：只有當 defaults.reqFA 為 true 時，才計算鮮風量，否則為 0
+    const total_fresh_air_ls = defaults.reqFA ? (people * fresh_air_rate) : 0;
+    
     const m_fresh_air = total_fresh_air_ls * 1.2 / 1000; // kg/s
 
     // Sensible: m * Cp(1.025) * dT
