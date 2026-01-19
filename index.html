@@ -535,13 +535,30 @@
             </div> 
 
             <div class="action-bar" style="margin-top: 2rem; margin-bottom: 8rem; text-align: center;">
-                <button onclick="RenoApp.generateHVACReport()" class="btn btn-premium shadow-btn btn-hvac-calc">
-                    <i class="fas fa-file-pdf"></i> 生成 HVAC 計算報告 (PDF)
-                </button>
-                <p style="margin-top: 1rem; color: #718096; font-size: 0.9rem;">
-                    <i class="fas fa-info-circle"></i> 報告將包含詳細負荷計算書 (Detailed Load Schedule)
-                </p>
+    
+    <div class="premium-card" style="margin-top: 0;">
+        <div class="premium-content">
+            <h3><i class="fas fa-wind"></i> 解鎖 HVAC 專業報告</h3>
+            <p>獲取包含詳細冷負荷 (Cooling Load) 與通風量 (Fresh Air/Exhaust) 計算書的 <strong>PDF 報告</strong></p>
+            <ul>
+                <li>✅ 完整各房間負荷明細表</li>
+                <li>✅ 符合食肆/場所發牌通風要求</li>
+                <li>✅ 自動生成標準設計參數表</li>
+            </ul>
+            <div class="premium-price">
+                <span class="price">試營運免費 Unlock Now(Free)</span>
             </div>
+            
+            <button onclick="RenoApp.handleExportRequest()" class="btn-premium btn-hvac-calc">
+                <i class="fas fa-unlock"></i> 立即解鎖 Unlock Now
+            </button>
+        </div>
+    </div>
+
+    <p style="margin-top: 1rem; color: #718096; font-size: 0.9rem;">
+        <i class="fas fa-info-circle"></i> 報告將包含詳細負荷計算書 (Detailed Load Schedule)
+    </p>
+</div>
             <div class="sticky-input-bar" style="border-top-color: var(--hvac-color);">
             ```
 

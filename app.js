@@ -802,49 +802,61 @@ const RenoApp = {
         }
         */
     },
-    // [新增] 檢查專案是否已解鎖，決定是下載還是跳出付費框
-    handleExportRequest: function() {
-        const project = this.state.projects[this.state.currentProjectIdx];
-        
-        // 1. 如果專案已經標記為「已付費 (is_paid)」，直接生成報告
-        if (project.is_paid === true) {
-            this.generatePDFProcess(); // 直接下載
+    // [修改] app.js - 智能判斷導出請求
+handleExportRequest: function() {
+    const project = this.state.projects[this.state.currentProjectIdx];
+    
+    // 1. 如果專案已經標記為「已付費 (is_paid)」，直接生成對應報告
+    if (project.is_paid === true) {
+        if (project.type === 'HVAC') {
+            // ✅ 如果是 HVAC 專案，生成 HVAC 報告
+            this.generateHVACReport();
         } else {
-            // 2. 如果還沒付費，才打開付費視窗
-            this.unlockPremium(); 
+            // ⚡ 否則預設為電力報告
+            this.generatePDFProcess(); 
         }
-    },
+    } else {
+        // 2. 如果還沒付費，打開付費視窗 (共用同一個支付彈窗)
+        this.unlockPremium(); 
+    }
+},
     // 6. 優惠碼 (已美化彈窗)
     // [修改] 優惠碼驗證邏輯
-    redeemCode: async function() {
-        const input = document.getElementById('promo-code-input');
-        if (!input) return;
-        const code = input.value.trim().toUpperCase();
-        const project = this.state.projects[this.state.currentProjectIdx];
+    // [修改] app.js - 優惠碼驗證邏輯 (含分流)
+redeemCode: async function() {
+    const input = document.getElementById('promo-code-input');
+    if (!input) return;
+    const code = input.value.trim().toUpperCase();
+    const project = this.state.projects[this.state.currentProjectIdx];
 
-        if (code === 'VIP888') {
-            // 1. 關閉視窗
-            this.closePaymentModal();
+    if (code === 'VIP888') {
+        // 1. 關閉視窗
+        this.closePaymentModal();
 
-            // 2. 【核心修改】將此專案標記為已付費
-            project.is_paid = true;
-            
-            // 3. 【核心修改】立刻存檔到雲端 (這樣下次登入還會記得)
-            // 這裡直接用 saveProjects() 就會把 is_paid 狀態一起存進 user_data 表
-            await this.saveProjects();
+        // 2. 將此專案標記為已付費
+        project.is_paid = true;
+        
+        // 3. 立刻存檔到雲端
+        await this.saveProjects();
 
-            // 4. 顯示成功並下載
-            await this.showCustomModal(
-                '驗證成功 Success', 
-                '🎉 專案已解鎖！您可以永久免費修改並下載此報告。', 
-                false
-            );
-            
-            this.generatePDFProcess(); 
+        // 4. 顯示成功提示
+        await this.showCustomModal(
+            '驗證成功 Success', 
+            '🎉 專案已解鎖！您可以永久免費修改並下載此報告。', 
+            false
+        );
+        
+        // 5. [關鍵修改] 根據專案類型，執行對應的生成流程
+        if (project.type === 'HVAC') {
+            this.generateHVACReport(); // 🌪️ 生成 HVAC PDF
         } else {
-            await this.showCustomModal('驗證失敗 Invalid', '❌ 無效的優惠碼 (Invalid Code)', false);
+            this.generatePDFProcess(); // ⚡ 生成電力 PDF
         }
-    },
+
+    } else {
+        await this.showCustomModal('驗證失敗 Invalid', '❌ 無效的優惠碼 (Invalid Code)', false);
+    }
+},
 
     // 7. 充值彈窗 (已美化)
     showTopUpModal: async function() {
