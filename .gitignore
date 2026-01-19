@@ -11,3 +11,5 @@ Thumbs.db
 
 # --- 忽略備份資料夾 (如果你有的話) ---
 BACKUP*/
+
+desktop.ini
