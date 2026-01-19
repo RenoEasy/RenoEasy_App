@@ -711,7 +711,7 @@ unlockPremium: function() {
                 listEl.innerHTML = `
                     <li><i class="fas fa-wind" style="color:var(--hvac-color)"></i> 完整 PDF 計算書 (含冷負荷明細)</li>
                     <li><i class="fas fa-check"></i> 符合食肆/場所發牌通風標準</li>
-                    <li><i class="fas fa-check"></i> 設計參數表 (Design Params)</li>
+                    <li><i class="fas fa-check"></i> 設計參數表 (Design Parameters)</li>
                 `;
             } else {
                 // ⚡ 電力 專屬賣點 (預設)
