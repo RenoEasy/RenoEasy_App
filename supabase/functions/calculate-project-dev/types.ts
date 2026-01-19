@@ -72,7 +72,7 @@ export interface ElectricalResult {
 // HVAC Types (V2.0 - Premium Report Structure)
 // ----------------------------------------------------------------------------
 export interface HVACInput {
-  key: string;      // e.g., "office", "meeting"
+  key: string;      // e.g., "office", "meeting"1
   area: number;     // Square meters
   height?: number;  // Ceiling height (default: 3.0m)
   people?: number;  // Number of occupants (User responsibility)

@@ -55,7 +55,7 @@ const HVACModule = {
 
         
         // C. 準備數據包 (Payload)
-        // [FUTURE] 當前使用房間類型預設值，未來可加入手動選擇
+        // [FUTURE] 當前使用房間類型預設值，未來可加入手動選擇1
         const inputPayload = {
             key: typeEl.value,
             area: parseFloat(areaEl.value),

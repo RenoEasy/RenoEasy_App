@@ -230,7 +230,7 @@ function calculateSpace(input: HVACInput): HVACResult | null {
     const Q_equipment = area * defaults.std_equip_density;
 
     // 5. Fresh Air
-    const fresh_air_rate = 10; // L/s/person
+    const fresh_air_rate = 10; // L/s/person1
     
     // [CRITICAL FIX] User override takes precedence over defaults
     const requiresFreshAir = input.reqFA !== undefined ? input.reqFA : defaults.reqFA;
