@@ -338,11 +338,17 @@ function calculateSpace(input: HVACInput): HVACResult | null {
           required_hp: parseFloat(required_cooling_hp.toFixed(2)),
           rounded_hp: rounded_hp
         },
-        fresh_air: {
+        // ✅ [修正] 不需新風時，所有數據顯示為 0
+        fresh_air: requiresFreshAir ? {
           number_of_people: people,
           fresh_air_rate: fresh_air_rate,
           required_ls: Math.round(total_fresh_air_ls),
           required_cmh: Math.round(total_fresh_air_ls * 3.6)
+        } : {
+          number_of_people: 0,
+          fresh_air_rate: 0,
+          required_ls: 0,
+          required_cmh: 0
         },
         airflow: {
           room_sensible_w: Math.round(sub_total_sensible),
@@ -351,10 +357,11 @@ function calculateSpace(input: HVACInput): HVACResult | null {
           required_ls: Math.round(required_fa_cmh / 3.6),
           required_cmh: Math.round(required_fa_cmh)
         },
+        // ✅ [修正] 不需排風時，顯示 ACH = 0
         exhaust: {
           volume_m3: parseFloat(volume.toFixed(2)),
-          ach: ach,
-          required_cmh: Math.round(required_ea_cmh)
+          ach: requiresExhaust ? ach : 0,
+          required_cmh: requiresExhaust ? Math.round(required_ea_cmh) : 0
         }
       },
       geometry: {
