@@ -20,8 +20,11 @@
 
     <div class="soft-launch-banner">
     <i class="fas fa-bullhorn"></i> 
-    <strong>試營運階段 (Soft Launch)</strong>：2026/01/14 - 01/28 全面開放試用。
-    <span class="highlight-code">結帳時輸入優惠碼：VIP888</span> 即可免費解鎖報告。
+    <strong>試營運階段 (Soft Launch)</strong>：
+    <span style="background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 4px;">
+        <i class="fas fa-check"></i> HVAC 空調計算已上線
+    </span>
+    <span class="highlight-code">結帳輸入：VIP888</span> 即可免費解鎖全部報告。
 </div>
     <nav class="navbar">
         <div class="nav-container">
@@ -211,27 +214,37 @@
                             </button>
                         </div>
 
-                        <div class="pricing-card coming-soon">
-                            <div class="pricing-icon gray">
-                                <i class="fas fa-wind"></i>
-                            </div>
-                            <h4>空調及通風設計<br><span style="font-size:0.8em; font-weight:400;">HVAC Design Calc</span></h4>
-                            
-                            <div class="price-tag">
-                                <span class="amount" style="font-size: 2rem;">敬請期待</span>
-                                <span class="period" style="display:block;">Coming Soon</span>
-                            </div>
+                        <div class="pricing-card">
+    <div class="pricing-icon" style="background: #f0fff4; color: var(--hvac-color);">
+        <i class="fas fa-wind"></i>
+    </div>
+    
+    <h4>空調及通風設計<br><span style="font-size:0.8em; font-weight:400;">HVAC Design Calc</span></h4>
+    
+    <div class="price-tag">
+        <span class="currency" style="color: #cbd5e0; font-weight: 500;">MOP</span>
+        <span class="amount" style="color: var(--hvac-color);">0</span>
+        
+        <div style="background: #f0fff4; color: var(--hvac-color); display: inline-block; padding: 4px 12px; border-radius: 4px; font-weight: 700; font-size: 1rem; vertical-align: middle; margin-left: 10px;">
+            試營運免費
+        </div>
+        
+        <span class="period" style="display: block; margin-top: 10px;">
+            <i class="fas fa-info-circle"></i> 需輸入優惠碼: <strong>VIP888</strong>
+        </span>
+    </div>
 
-                            <ul class="pricing-features">
-                                <li><i class="fas fa-hourglass-half"></i> 冷量負荷估算 (Cooling Load)</li>
-                                <li><i class="fas fa-hourglass-half"></i> 通風量計算 (Fresh Air)</li>
-                                <li><i class="fas fa-hourglass-half"></i> 滿足食肆/場所發牌要求</li>
-                            </ul>
+    <ul class="pricing-features">
+        <li><i class="fas fa-check-circle"></i> 冷量負荷估算 (Cooling Load)</li>
+        <li><i class="fas fa-check-circle"></i> 通風量計算 (Fresh Air)</li>
+        <li><i class="fas fa-check-circle"></i> 滿足食肆/場所發牌要求</li>
+        <li><i class="fas fa-file-pdf"></i> 生成 PDF 詳細計算書</li>
+    </ul>
 
-                            <button class="btn btn-secondary btn-block" disabled style="opacity: 0.7; cursor: not-allowed;">
-                                開發中 Under Dev
-                            </button>
-                        </div>
+    <button onclick="RenoApp.doLogin()" class="btn btn-hvac btn-block shadow-btn">
+        立即開始 Start Now
+    </button>
+</div>
                     </div>
                 </section>
 
@@ -620,7 +633,7 @@
     <div id="guideModal" class="guide-modal-overlay">
         <div class="guide-modal-content">
             <div class="guide-header">
-                <h2><i class="fas fa-book"></i> 機電系統設計與核算指引 (v0)</h2>
+                <h2><i class="fas fa-book"></i> 機電系統設計與核算指引 (v1)</h2>
                 <button class="close-guide-btn" onclick="toggleGuide()">×</button>
             </div>
             <div class="guide-body">
