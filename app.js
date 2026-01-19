@@ -697,24 +697,47 @@ const RenoApp = {
     // ============================================
 
     // 1. 打開支付彈窗 (包含鎖定滾動)
-    unlockPremium: function() {
-        const modal = document.getElementById('payment-modal');
-        if (modal) {
-            modal.classList.remove('hidden');
-            modal.style.display = 'flex'; 
-            
-            // [Phase 1 修改] 強制切換到優惠碼 Tab，忽略餘額檢查
-            // this.checkBalanceForModal(); // 暫時註解
-            this.switchTab('promo'); 
-            
-            // [Phase 1 修改] 自動填入 VIP888 (提升體驗)
-            const promoInput = document.getElementById('promo-code-input');
-            if(promoInput) promoInput.value = 'VIP888';
+    // [修改] app.js - unlockPremium (動態切換銷售文案)
+unlockPremium: function() {
+    const modal = document.getElementById('payment-modal');
+    if (modal) {
+        // ====== [新增] 動態切換銷售文案 (Dynamic Sales Copy) ======
+        const project = this.state.projects[this.state.currentProjectIdx];
+        const listEl = modal.querySelector('.benefit-list');
 
-            // 鎖定背景滾動
-            document.body.style.overflow = 'hidden'; 
+        if (project && listEl) {
+            if (project.type === 'HVAC') {
+                // 🌪️ HVAC 專屬賣點
+                listEl.innerHTML = `
+                    <li><i class="fas fa-wind" style="color:var(--hvac-color)"></i> 完整 PDF 計算書 (含冷負荷明細)</li>
+                    <li><i class="fas fa-check"></i> 符合食肆/場所發牌通風標準</li>
+                    <li><i class="fas fa-check"></i> 自動生成設計參數表 (Design Params)</li>
+                `;
+            } else {
+                // ⚡ 電力 專屬賣點 (預設)
+                listEl.innerHTML = `
+                    <li><i class="fas fa-bolt" style="color:var(--primary-color)"></i> 完整 PDF 報告 (含負載表)</li>
+                    <li><i class="fas fa-check"></i> 線徑選型與電壓降數據</li>
+                    <li><i class="fas fa-check"></i> 三相平衡計算圖表</li>
+                `;
+            }
         }
-    },
+        // ========================================================
+
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex'; 
+        
+        // 強制切換到優惠碼 Tab
+        this.switchTab('promo'); 
+        
+        // 自動填入 VIP888
+        const promoInput = document.getElementById('promo-code-input');
+        if(promoInput) promoInput.value = 'VIP888';
+
+        // 鎖定背景滾動
+        document.body.style.overflow = 'hidden'; 
+    }
+},
 
     // 2. 關閉支付彈窗 (包含解鎖滾動)
     closePaymentModal: function() {
