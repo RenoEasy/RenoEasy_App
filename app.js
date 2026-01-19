@@ -1766,24 +1766,27 @@ openProject: function(idx) {
         }
     },
 
-    // [修改] app.js - generateHVACReportCanvas
+    // [修正] app.js - generateHVACReportCanvas (補回 TABLE_WIDTH 定義)
 generateHVACReportCanvas: function(item, projectName, roomIndex, totalRooms) {
     return new Promise((resolve) => {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
         
-        // ... (Canvas 尺寸與背景設定保持不變) ...
+        // 設定畫布尺寸 (A4 300dpi)
         const WIDTH = 2480;
         const HEIGHT = 3508;
         canvas.width = WIDTH; canvas.height = HEIGHT;
+        
+        // 白底
         ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, WIDTH, HEIGHT);
         
         let y = 80; 
         const MARGIN = 80;
         
-        // ====== [新增] 生成專案唯一編號 (偽造防護) ======
-        // 使用專案名稱的 Hash 或簡單的時間戳記作為 ID
-        // 這裡示範用 "PID-" + 當前專案索引與時間雜湊，確保同一專案編號一致
+        // ✅ [關鍵修正] 定義表格寬度 (總寬 - 左右邊距)
+        const TABLE_WIDTH = WIDTH - (MARGIN * 2);
+
+        // ====== 生成專案唯一編號 (偽造防護) ======
         const projectIdx = this.state.currentProjectIdx;
         const project = this.state.projects[projectIdx];
         const uniqueID = `PID-${project.id ? project.id.toString().slice(-6) : '000000'}`;
@@ -1791,9 +1794,10 @@ generateHVACReportCanvas: function(item, projectName, roomIndex, totalRooms) {
         // ====== 標題區 ======
         ctx.fillStyle = '#003399'; // COLOR_PRIMARY
         ctx.font = 'bold 48px Arial';
+        ctx.textAlign = 'left';
         ctx.fillText('空調負荷及通風量計算書 (AC Load & Ventilation Calculation)', MARGIN + 20, y + 65);
         
-        // [新增] 在右上角印上專案編號
+        // 右上角 Ref 編號
         ctx.font = 'bold 28px Arial';
         ctx.fillStyle = '#718096'; // 灰色
         ctx.textAlign = 'right';
@@ -1806,28 +1810,27 @@ generateHVACReportCanvas: function(item, projectName, roomIndex, totalRooms) {
         // 顯示專案名稱
         ctx.fillText(`Project: ${projectName} | Room: ${item.label}`, MARGIN + 20, y + 30);
         
-        // ... (其餘繪製代碼保持不變) ...
-            
-            y += 80;
-            
-            const data = item.detailedLoad;
-            
-            // ====== Section 1: Design Parameters ======
-            this.drawHVACSection1(ctx, data, item, y, MARGIN, TABLE_WIDTH);
-            y += this.calculateSection1Height();
-            
-            // ====== Section 2: Load Summary ======
-            y += 60;
-            this.drawHVACSection2(ctx, data, y, MARGIN, TABLE_WIDTH);
-            y += this.calculateSection2Height(data);
-            
-            // ====== Section 3: Equipment Sizing ======
-            y += 60;
-            this.drawHVACSection3(ctx, data, y, MARGIN, TABLE_WIDTH);
-            
-            resolve(canvas);
-        });
-    },
+        y += 80;
+        
+        const data = item.detailedLoad;
+        
+        // ====== Section 1: Design Parameters ======
+        // 現在 TABLE_WIDTH 已經定義了，這行不會再報錯
+        this.drawHVACSection1(ctx, data, item, y, MARGIN, TABLE_WIDTH);
+        y += this.calculateSection1Height();
+        
+        // ====== Section 2: Load Summary ======
+        y += 60;
+        this.drawHVACSection2(ctx, data, y, MARGIN, TABLE_WIDTH);
+        y += this.calculateSection2Height(data);
+        
+        // ====== Section 3: Equipment Sizing ======
+        y += 60;
+        this.drawHVACSection3(ctx, data, y, MARGIN, TABLE_WIDTH);
+        
+        resolve(canvas);
+    });
+},
     
     // Section 1: Design Parameters 繪製
     drawHVACSection1: function(ctx, data, item, startY, margin, tableWidth) {
