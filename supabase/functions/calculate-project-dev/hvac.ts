@@ -231,7 +231,12 @@ function calculateSpace(input: HVACInput): HVACResult | null {
 
     // 5. Fresh Air
     const fresh_air_rate = 10; // L/s/person
-    const total_fresh_air_ls = defaults.reqFA ? (people * fresh_air_rate) : 0;
+    
+    // [CRITICAL FIX] User override takes precedence over defaults
+    const requiresFreshAir = input.reqFA !== undefined ? input.reqFA : defaults.reqFA;
+    const requiresExhaust = input.reqEA !== undefined ? input.reqEA : defaults.reqEA;
+    
+    const total_fresh_air_ls = requiresFreshAir ? (people * fresh_air_rate) : 0;
         const m_fresh_air = total_fresh_air_ls * 1.2 / 1000; // kg/s
 
     // Sensible: m * Cp(1.025) * dT
@@ -266,9 +271,8 @@ function calculateSpace(input: HVACInput): HVACResult | null {
     // Air Flow: Q_sensible / (1.224 * 10) * 3.6
     const required_fa_cmh = (sub_total_sensible / (1.224 * 10)) * 3.6;
 
-    // Exhaust
-    const ach = defaults.reqEA ? 10 : 0;
-    const required_ea_cmh = defaults.reqEA ? (volume * ach) : 0;
+    const ach = requiresExhaust ? 10 : 0;
+    const required_ea_cmh = requiresExhaust ? (volume * ach) : 0;
 
     // ------------------------------------------------------------------------
     // H. Result Construction (DetailedLoad)
@@ -371,10 +375,10 @@ function calculateSpace(input: HVACInput): HVACResult | null {
       people: people,
       coolingHP: rounded_hp,
       coolingHPDisplay: rounded_hp > 0 ? `${rounded_hp} HP` : "-",
-      requiresFreshAir: defaults.reqFA,
-      requiresExhaust: defaults.reqEA,
-      freshAirDisplay: defaults.reqFA ? "YES / 是" : "NO / 否",
-      exhaustDisplay: defaults.reqEA ? "YES / 是" : "NO / 否",
+      requiresFreshAir: requiresFreshAir,
+      requiresExhaust: requiresExhaust,
+      freshAirDisplay: requiresFreshAir ? "YES / 是" : "NO / 否",
+      exhaustDisplay: requiresExhaust ? "YES / 是" : "NO / 否",
       detailedLoad: detailedLoad
     };
 

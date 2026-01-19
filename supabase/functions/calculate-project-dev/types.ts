@@ -76,6 +76,8 @@ export interface HVACInput {
   area: number;     // Square meters
   height?: number;  // Ceiling height (default: 3.0m)
   people?: number;  // Number of occupants (User responsibility)
+  reqFA?: boolean;  // User override: Require Fresh Air (overrides default)
+  reqEA?: boolean;  // User override: Require Exhaust Air (overrides default)
 }
 
 // 詳細負荷數據結構 (對應 PDF/Excel 報告)
