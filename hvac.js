@@ -94,8 +94,8 @@ addItem: async function() {
         console.log("呼叫 HVAC 雲端計算 (DEV)...");
 
         // E. 發送請求 (Action: hvac)
-        // ✅ [確認] 使用 calculate-project-dev
-        const { data, error } = await supabaseClient.functions.invoke('calculate-project-dev', {
+        // ✅ [確認] 使用 calculate-project
+        const { data, error } = await supabaseClient.functions.invoke('calculate-project', {
             body: { 
                 action: 'hvac',         // 告訴後端這是 HVAC 請求
                 inputs: [inputPayload]  // 放入陣列
