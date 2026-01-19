@@ -2062,8 +2062,12 @@ const RenoApp = {
         }
         
         // D. Exhaust Air Flow Rate (排風量計算)
+        // 排風區塊（動態編號：有新風時為 D，無新風時為 C）
         if (data.equipment_sizing.exhaust.required_cmh > 0) {
-            this.drawEquipmentRow(ctx, margin, tableWidth, y, 'D. Exhaust Air Flow Rate (排風量計算)', '', '', '#f9f9f9', true);
+        const exhaustLabel = data.equipment_sizing.fresh_air.required_cmh > 0 
+        ? 'D. Exhaust Air Flow Rate (排風量計算)' 
+        : 'C. Exhaust Air Flow Rate (排風量計算)';
+        this.drawEquipmentRow(ctx, margin, tableWidth, y, exhaustLabel, '', '', '#f9f9f9', true);
             y += rowHeight;
             
             this.drawEquipmentRow(ctx, margin, tableWidth, y, 'Volume (空間體積)', data.equipment_sizing.exhaust.volume_m3, 'm3', '#ffffff', false);
