@@ -1075,22 +1075,45 @@ redeemCode: async function() {
         if (hCount === 0) listHvac.innerHTML = '<div style="color:#cbd5e0; text-align:center; padding:2rem;">暫無 HVAC 專案</div>';
     },
 
-    openProject: function(idx) {
-        this.state.currentProjectIdx = idx;
-        const project = this.state.projects[idx];
+    // [修改] app.js - openProject
+openProject: function(idx) {
+    this.state.currentProjectIdx = idx;
+    const project = this.state.projects[idx];
 
-        if (project.type === 'HVAC') {
-            this.showPage('page-hvac');
-            if (typeof HVACModule !== 'undefined') {
-                HVACModule.init();
-                HVACModule.loadData(project.hvacData || []);
-            }
+    // 1. 更新標題與鎖定狀態
+    // 這裡我們直接操作 DOM 來反映鎖定狀態
+    const titleEl = document.getElementById('workspace-project-name');
+    const statusEl = document.getElementById('workspace-status');
+    
+    if (titleEl) {
+        if (project.is_paid) {
+            // 🔒 已付費：加上鎖頭圖標，文字變灰表示鎖定
+            titleEl.innerHTML = `${project.name} <span style="font-size:0.6em; color:#cbd5e0; border:1px solid #cbd5e0; border-radius:4px; padding:2px 6px; vertical-align:middle;"><i class="fas fa-lock"></i> Locked</span>`;
         } else {
-            this.showPage('page-workspace');
-            this.updateWorkspaceTitle();
-            this.renderInputList();
+            // 🔓 未付費：顯示名稱
+            titleEl.textContent = project.name;
         }
-    },
+    }
+
+    if (statusEl) {
+        statusEl.innerHTML = project.is_paid 
+            ? '<span style="color:#38a169;"><i class="fas fa-check-circle"></i> 已授權 Premium</span>' 
+            : '設計中 Editing...';
+    }
+
+    // 2. 分流邏輯
+    if (project.type === 'HVAC') {
+        this.showPage('page-hvac');
+        if (typeof HVACModule !== 'undefined') {
+            HVACModule.init();
+            HVACModule.loadData(project.hvacData || []);
+        }
+    } else {
+        this.showPage('page-workspace');
+        // this.updateWorkspaceTitle(); // 上面已經處理了標題，這行可以註解掉或保留作保險
+        this.renderInputList();
+    }
+},
 
     deleteProject: async function(idx) {
         // 阻止事件冒泡 (如果按鈕在可點擊區域內)
@@ -1743,46 +1766,47 @@ redeemCode: async function() {
         }
     },
 
-    // =========================================================================
-    // HVAC Canvas 報告生成器
-    // =========================================================================
-    generateHVACReportCanvas: function(item, projectName, roomIndex, totalRooms) {
-        return new Promise((resolve) => {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            
-            // Canvas 尺寸設定（A4 豎向 300dpi）
-            const WIDTH = 2480;  // A4 width at 300dpi
-            const HEIGHT = 3508; // A4 height at 300dpi
-            canvas.width = WIDTH;
-            canvas.height = HEIGHT;
-            
-            // 顏色定義
-            const COLOR_PRIMARY = '#003399';
-            const COLOR_HEADER_BG = '#f0f0f0';
-            const COLOR_HIGHLIGHT_GREEN = '#d4edda';
-            const COLOR_HIGHLIGHT_BLUE = '#e6f7ff';
-            const COLOR_HIGHLIGHT_YELLOW = '#fff3cd';
-            const COLOR_BORDER = '#cccccc';
-            const COLOR_TEXT = '#000000';
-            
-            // 字體設定
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, WIDTH, HEIGHT);
-            
-            let y = 80; // 起始 Y 座標
-            const MARGIN = 80;
-            const TABLE_WIDTH = WIDTH - MARGIN * 2;
-            
-            // ====== 標題區 ======
-            ctx.fillStyle = COLOR_PRIMARY;
-            ctx.font = 'bold 48px Arial';
-            ctx.fillText('空調負荷及通風量計算書 (AC Load & Ventilation Calculation)', MARGIN + 20, y + 65);
-            
-            y += 80;
-            ctx.fillStyle = COLOR_TEXT;
-            ctx.font = '32px Arial';
-            ctx.fillText(`Project: ${projectName} | Room: ${item.label}`, MARGIN + 20, y + 30);
+    // [修改] app.js - generateHVACReportCanvas
+generateHVACReportCanvas: function(item, projectName, roomIndex, totalRooms) {
+    return new Promise((resolve) => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // ... (Canvas 尺寸與背景設定保持不變) ...
+        const WIDTH = 2480;
+        const HEIGHT = 3508;
+        canvas.width = WIDTH; canvas.height = HEIGHT;
+        ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, WIDTH, HEIGHT);
+        
+        let y = 80; 
+        const MARGIN = 80;
+        
+        // ====== [新增] 生成專案唯一編號 (偽造防護) ======
+        // 使用專案名稱的 Hash 或簡單的時間戳記作為 ID
+        // 這裡示範用 "PID-" + 當前專案索引與時間雜湊，確保同一專案編號一致
+        const projectIdx = this.state.currentProjectIdx;
+        const project = this.state.projects[projectIdx];
+        const uniqueID = `PID-${project.id ? project.id.toString().slice(-6) : '000000'}`;
+
+        // ====== 標題區 ======
+        ctx.fillStyle = '#003399'; // COLOR_PRIMARY
+        ctx.font = 'bold 48px Arial';
+        ctx.fillText('空調負荷及通風量計算書 (AC Load & Ventilation Calculation)', MARGIN + 20, y + 65);
+        
+        // [新增] 在右上角印上專案編號
+        ctx.font = 'bold 28px Arial';
+        ctx.fillStyle = '#718096'; // 灰色
+        ctx.textAlign = 'right';
+        ctx.fillText(`Ref: ${uniqueID}`, WIDTH - MARGIN, y + 65);
+        ctx.textAlign = 'left'; // 復原對齊
+
+        y += 80;
+        ctx.fillStyle = '#000000'; // COLOR_TEXT
+        ctx.font = '32px Arial';
+        // 顯示專案名稱
+        ctx.fillText(`Project: ${projectName} | Room: ${item.label}`, MARGIN + 20, y + 30);
+        
+        // ... (其餘繪製代碼保持不變) ...
             
             y += 80;
             

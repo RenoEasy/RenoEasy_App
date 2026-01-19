@@ -34,24 +34,24 @@ const HVACModule = {
     },
 
     // 3. [核心升級] 新增項目 (呼叫 Supabase 雲端計算)
-    addItem: async function() {
-        // A. 獲取輸入
-        const typeEl = document.getElementById('hvac-type');
-        const areaEl = document.getElementById('hvac-area');
-        const heightEl = document.getElementById('hvac-height');
-        const peopleEl = document.getElementById('hvac-people');
-
-        if (!typeEl || !areaEl || !heightEl || !peopleEl) return;
-
-        // B. 驗證
-        if (!typeEl.value || !areaEl.value) {
-            if (typeof RenoApp !== 'undefined' && RenoApp.showCustomModal) {
-                await RenoApp.showCustomModal("資料不全", "請輸入類型與面積", false);
-            } else {
-                alert("請完整輸入類型與面積");
-            }
-            return;
+    // [修改] hvac.js
+addItem: async function() {
+    // 1. [核心修改] 嚴格限制空間數量 (Small Project Limit)
+    // 針對 69kVA 以下小型工程，5 個空間是合理的上限
+    const MAX_ITEMS = 5; 
+    
+    if (this.items.length >= MAX_ITEMS) {
+        if (typeof RenoApp !== 'undefined') {
+            await RenoApp.showCustomModal(
+                "達到空間上限 Limit Reached", 
+                "⚠️ 本系統專為小型工程 (<69kVA) 設計。\n單一專案最多支援 5 個空間計算。\n\n如需計算更多空間，請建立新專案。", 
+                false
+            );
+        } else {
+            alert("已達到空間數量上限 (Max 5 Rooms)");
         }
+        return; // ⛔ 阻止繼續執行
+    }
 
         
         // C. 準備數據包 (Payload)
