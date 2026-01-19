@@ -1065,6 +1065,59 @@ body {
     padding-left: 28px;          /* 微妙的向右滑動 */
 }
 
+/* ==========================================================================
+   [新增] 側邊欄高亮按鈕樣式 (Engineering Amber)
+   ========================================================================== */
+
+/* 1. 高亮按鈕本體 (覆蓋原本 .nav-item 的樣式) */
+.nav-highlight {
+    background-color: #fffaf0;  /* 極淺橙色背景 (Warm White) */
+    color: #c05621 !important;  /* 強制深橙色文字 */
+    border-left-color: #ed8936; /* 橙色左側邊框 */
+    font-weight: 700;           /* 加粗字體 */
+    position: relative;         /* 用於定位 Badge */
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(237, 137, 54, 0.1); /* 輕微橙色陰影 */
+}
+
+/* Hover 懸停效果：加深背景 */
+.nav-highlight:hover {
+    background-color: #feebc8;  /* 淺橙色 */
+    color: #9c4221 !important;  /* 更深的橙褐色 */
+    padding-left: 28px;         /* 保持原有的滑動特效 */
+    transform: translateY(-1px); /* 輕微上浮 */
+}
+
+/* 2. Icon 特別處理：顏色與動畫 */
+.nav-highlight i {
+    color: #ed8936; /* Icon 改為亮橙色 */
+    animation: pulse-icon 2s infinite; /* 加入呼吸燈動畫 */
+}
+
+.nav-highlight:hover i {
+    color: #c05621; /* Hover 時變深 */
+}
+
+/* 3. "必讀" 小標籤 (Must Read Badge) */
+.nav-badge {
+    font-size: 0.7rem;
+    background: #ed8936;    /* 實心橙色背景 */
+    color: white;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-left: auto;      /* 關鍵：利用 auto 將標籤推到最右邊 */
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* 4. 動畫定義 */
+@keyframes pulse-icon {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.15); } /* 稍微放大 */
+    100% { transform: scale(1); }
+}
+
 /* [修改] Active 激活狀態 */
 .nav-item.active {
     background-color: #e0f2fe;   /* 淺藍色背景 */
