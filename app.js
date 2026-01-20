@@ -6,7 +6,7 @@
 // 1. 初始化 Supabase (修正命名衝突)
 // ==========================================
 const SUPABASE_URL = 'https://tjavymruxsqkexczmxvd.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_JV7PTUNvhawsCVANpQ8uNg_zV8qHNAQ';
+const SUPABASE_KEY = 'sb_publishable_JV7PTUNvhawsCVANpQ8uNsb_publishable_JV7PTUNvhawsCVANpQ8uNg_zV8qHNAQg_zV8qHNAQ';
 
 // ⚠️ 注意：這裡改名叫 supabaseClient，避免跟工具箱名字打架
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
