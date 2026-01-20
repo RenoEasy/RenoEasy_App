@@ -5,7 +5,7 @@
 // ==========================================
 // 1. 初始化 Supabase (修正命名衝突)
 // ==========================================
-const SUPABASE_URL = 'https://tjavymruxsqkexczmxvd.supabase.co/functions/v1/calculate-project';
+const SUPABASE_URL = 'https://tjavymruxsqkexczmxvd.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqYXZ5bXJ1eHNxa2V4Y3pteHZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc4MzcxMTksImV4cCI6MjA4MzQxMzExOX0._769_JX4HDWjg01Ch_vhNgVsSSg0vLthHFT6NzB642g';
 
 // ⚠️ 注意：這裡改名叫 supabaseClient，避免跟工具箱名字打架

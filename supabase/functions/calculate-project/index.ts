@@ -6,9 +6,12 @@
 import { calculateElectrical } from './electrical.ts';
 import { calculateHVAC } from './hvac.ts';
 
+// Path: supabase/functions/calculate-project/index.ts
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  // ✅ [完美版] 包含 prefer, accept-profile, content-profile 等所有 Supabase 常用標頭
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-api-version, accept-profile, content-profile, prefer',
 };
 
 // 使用 Deno 內建的 serve 函數 (無需引用外部網址)
@@ -41,9 +44,14 @@ Deno.serve(async (req: Request) => {
         console.log("Processing Electrical Request...");
         
         // 兼容舊版結構
-        const elecInputs = body.inputs || body.items;
+        // --- 執行 電力計算 (預設) ---
+        console.log("Processing Electrical Request...");
         
-        if (!elecInputs || !Array.isArray(elecInputs)) {
+        // [修正] 加了 || []，如果沒數據就當作是「空列表」，不要報錯
+        const elecInputs = body.inputs || body.items || [];
+        
+        // 只有當它真的「格式錯誤」(例如傳了字串) 才報錯
+        if (!Array.isArray(elecInputs)) {
             throw new Error("Invalid inputs: 電力數據必須是陣列");
         }
         result = calculateElectrical(elecInputs);
