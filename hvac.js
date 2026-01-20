@@ -94,7 +94,7 @@ const HVACModule = {
                 A: cloudResult.area,
                 Ppl: cloudResult.people,
                 
-                // 冷量樣式 (藍色粗體)
+                // 冷量樣式 (藍色粗體)1
                 strCooling: cloudResult.coolingHP > 0 
                     ? `<span style="font-weight:700; color:#2c5282;">${cloudResult.coolingHPDisplay}</span>` 
                     : "<span style='color:#cbd5e0'>-</span>",
