@@ -14,7 +14,7 @@ export interface ApiResponse<T = unknown> {
 }
 
 // ----------------------------------------------------------------------------
-// ELECTRICAL Types
+// ELECTRICAL Types1
 // ----------------------------------------------------------------------------
 export interface ElectricalInput {
   type: string;

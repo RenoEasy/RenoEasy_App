@@ -232,7 +232,7 @@ function calculateSpace(input: HVACInput): HVACResult | null {
     // 5. Fresh Air
     const fresh_air_rate = 10; // L/s/person1
     
-    // [CRITICAL FIX] User override takes precedence over defaults
+    // [CRITICAL FIX] User override takes precedence over defaults1
     const requiresFreshAir = input.reqFA !== undefined ? input.reqFA : defaults.reqFA;
     const requiresExhaust = input.reqEA !== undefined ? input.reqEA : defaults.reqEA;
     

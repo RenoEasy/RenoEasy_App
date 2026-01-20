@@ -50,7 +50,7 @@ addItem: async function() {
         } else {
             alert("已達到空間數量上限 (Max 5 Rooms)");
         }
-        return; // ⛔ 阻止繼續執行
+        return; // ⛔ 阻止繼續執行1
     }
 
     // 2. [補回] 獲取 HTML 輸入框元素 (DOM Elements) - 這是之前報錯缺失的部分

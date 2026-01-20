@@ -1118,7 +1118,7 @@ body {
     100% { transform: scale(1); }
 }
 
-/* [修改] Active 激活狀態 */
+/* [修改] Active 激活狀態1 */
 .nav-item.active {
     background-color: #e0f2fe;   /* 淺藍色背景 */
     color: #0284c7;              /* 深天藍文字 */

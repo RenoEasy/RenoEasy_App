@@ -22,7 +22,7 @@ const RenoEngine = {
              return type;
         };
 
-        // ✅ [修改] 分組邏輯
+        // ✅ [修改] 分組邏輯1
         const getSplitLimit = (type) => {
              // 1. 一般插座 -> 6個一組
              if (type.includes('General Socket') || type.includes('一般插座')) return this.CONSTANTS.SPLIT_LIMITS.GENERAL;
