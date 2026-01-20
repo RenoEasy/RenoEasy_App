@@ -12,15 +12,19 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <div class="soft-launch-banner">
     <i class="fas fa-bullhorn"></i> 
-    <strong>試營運階段 (Soft Launch)</strong>：2026/01/14 - 01/28 全面開放試用。
-    <span class="highlight-code">結帳時輸入優惠碼：VIP888</span> 即可免費解鎖報告。
+    <strong>試營運階段 (Soft Launch)</strong>：
+    <span style="background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 4px;">
+        <i class="fas fa-check"></i> HVAC 空調計算已上線
+    </span>
+    <span class="highlight-code">結帳輸入：VIP888</span> 即可免費解鎖全部報告。
 </div>
     <nav class="navbar">
         <div class="nav-container">
@@ -54,13 +58,19 @@
                 </button>
 
                 <nav class="sidebar-nav" id="sidebar-nav-list">
-                    <a href="#hero" class="nav-item active"><i class="fas fa-home"></i> 首頁 Home</a>
-                    <a href="#features" class="nav-item"><i class="fas fa-list-alt"></i> 服務介紹 Services</a>
-                    <a href="#" class="nav-item" onclick="toggleGuide(); RenoApp.toggleMobileMenu(); return false;"> <i class="fas fa-book-reader"></i> 設計指引 Design Guide</a>
-                    <a href="#submission" class="nav-item"><i class="fas fa-file-signature"></i> 入則服務 Services</a>
-                    <a href="#pricing" class="nav-item"><i class="fas fa-tags"></i> 收費標準 Pricing</a>
-                    <a href="#contact" class="nav-item"><i class="fas fa-envelope"></i> 聯絡我們 Contact</a>
-                </nav>
+    <a href="#hero" class="nav-item active"><i class="fas fa-home"></i> 首頁 Home</a>
+    <a href="#features" class="nav-item"><i class="fas fa-list-alt"></i> 服務介紹 Services</a>
+    
+    <a href="#" class="nav-item nav-highlight" onclick="toggleGuide(); RenoApp.toggleMobileMenu(); return false;"> 
+        <i class="fas fa-book-reader"></i> 
+        設計指引 Design Guide
+        <span class="nav-badge">必讀</span>
+    </a>
+
+    <a href="#submission" class="nav-item"><i class="fas fa-file-signature"></i> 入則服務 Services</a>
+    <a href="#pricing" class="nav-item"><i class="fas fa-tags"></i> 收費標準 Pricing</a>
+    <a href="#contact" class="nav-item"><i class="fas fa-envelope"></i> 聯絡我們 Contact</a>
+</nav>
                 
                     <div class="sidebar-footer">
                     <div class="status-indicator">
@@ -69,7 +79,7 @@
                     <p>&copy; 2026 RenoEasy Calc.</p>
                 </div>
             </aside>
-//
+
             <main class="landing-main">
                 <div style="display: flex; justify-content: flex-end; padding: 1rem 2rem; background: white; border-bottom: 1px solid #e2e8f0;">
                      <button onclick="const input = document.getElementById('login-id'); if(input.value.trim()) { RenoApp.doLogin(); } else { input.focus(); }" class="btn btn-primary">登入 Login</button>
@@ -177,60 +187,104 @@
                     </div>
 
                     <div class="pricing-grid">
-                        <div class="pricing-card popular">
-                            <div class="popular-badge">推薦 / Recommended</div>
-                            <div class="pricing-icon">
-                                <i class="fas fa-bolt"></i>
-                            </div>
-                            <h4>電力負載表生成<br><span style="font-size:0.8em; font-weight:400;">Electrical Load Schedule</span></h4>
-                            
-                            <div class="price-tag">
-    <span class="currency" style="color: #cbd5e0; font-weight: 500;">MOP</span>
-    <span class="amount" style="color: var(--hvac-color);">0</span>
     
-    <div style="background: #ebf8ff; color: var(--primary-color); display: inline-block; padding: 4px 12px; border-radius: 4px; font-weight: 700; font-size: 1rem; vertical-align: middle; margin-left: 10px;">
-        試營運免費
+    <div class="pricing-card popular">
+        <div class="popular-badge">推薦 / Recommended</div>
+        
+        <div class="pricing-icon">
+            <i class="fas fa-bolt"></i>
+        </div>
+        <h4>電力負載表生成<br><span style="font-size:0.8em; font-weight:400;">Electrical Load Schedule</span></h4>
+        
+        <div class="price-tag">
+            <span class="currency" style="color: #cbd5e0; font-weight: 500;">MOP</span>
+            <span class="amount" style="color: var(--primary-color);">0</span>
+            <div style="background: #ebf8ff; color: var(--primary-color); display: inline-block; padding: 4px 12px; border-radius: 4px; font-weight: 700; font-size: 1rem; vertical-align: middle; margin-left: 10px;">
+                試營運免費
+            </div>
+            <span class="period" style="display: block; margin-top: 10px;">
+                <i class="fas fa-info-circle"></i> 需輸入優惠碼: <strong>VIP888</strong>
+            </span>
+        </div>
+
+        <ul class="pricing-features">
+            <li><i class="fas fa-check-circle"></i> 保護器及線徑選型 (Cable Sizing)</li>
+            <li><i class="fas fa-check-circle"></i> 電壓降核算 (Voltage Drop)</li>
+            <li><i class="fas fa-check-circle"></i> 選型CEM電錶功率</li>
+            <li><i class="fas fa-check-circle"></i> 支援三相平衡計算</li>
+            <li><i class="fas fa-file-pdf"></i> 生成 PDF 單線配電箱負載表</li>
+        </ul>
+
+        <button onclick="RenoApp.doLogin()" class="btn btn-primary btn-block shadow-btn">
+            立即開始 Start Now
+        </button>
     </div>
-    
-    <span class="period" style="display: block; margin-top: 10px;">
-        <i class="fas fa-info-circle"></i> 需輸入優惠碼: <strong>VIP888</strong>
-    </span>
+
+    <div class="pricing-card popular" style="border-color: var(--hvac-color);">
+        <div class="popular-badge" style="background: var(--hvac-color);">推薦 / Recommended</div>
+        
+        <div class="pricing-icon" style="background: #f0fff4; color: var(--hvac-color);">
+            <i class="fas fa-wind"></i>
+        </div>
+        
+        <h4>空調及通風設計<br><span style="font-size:0.8em; font-weight:400;">HVAC Design Calc</span></h4>
+        
+        <div class="price-tag">
+            <span class="currency" style="color: #cbd5e0; font-weight: 500;">MOP</span>
+            <span class="amount" style="color: var(--hvac-color);">0</span>
+            <div style="background: #f0fff4; color: var(--hvac-color); display: inline-block; padding: 4px 12px; border-radius: 4px; font-weight: 700; font-size: 1rem; vertical-align: middle; margin-left: 10px;">
+                試營運免費
+            </div>
+            <span class="period" style="display: block; margin-top: 10px;">
+                <i class="fas fa-info-circle"></i> 需輸入優惠碼: <strong>VIP888</strong>
+            </span>
+        </div>
+
+        <ul class="pricing-features">
+            <li><i class="fas fa-check-circle"></i> 冷量負荷估算 (Cooling Load)</li>
+            <li><i class="fas fa-check-circle"></i> 通風量計算 (Fresh Air)</li>
+            <li><i class="fas fa-check-circle"></i> 滿足食肆/場所發牌要求</li>
+            <li><i class="fas fa-file-pdf"></i> 生成 PDF 詳細計算書</li>
+        </ul>
+
+        <button onclick="RenoApp.doLogin()" class="btn btn-hvac btn-block shadow-btn">
+            立即開始 Start Now
+        </button>
+    </div>
+
 </div>
 
-                            <ul class="pricing-features">
-                                <li><i class="fas fa-check-circle"></i> 保護器及線徑選型 (Cable Sizing)</li>
-                                <li><i class="fas fa-check-circle"></i> 電壓降核算 (Voltage Drop)</li>
-                                <li><i class="fas fa-check-circle"></i> 選型CEM電錶功率</li>
-                                <li><i class="fas fa-check-circle"></i> 支援三相平衡計算</li>
-                                <li><i class="fas fa-file-pdf"></i> 生成 PDF 單線配電箱負載表</li>
-                            </ul>
+                        <div class="pricing-card">
+    <div class="pricing-icon" style="background: #f0fff4; color: var(--hvac-color);">
+        <i class="fas fa-wind"></i>
+    </div>
+    
+    <h4>空調及通風設計<br><span style="font-size:0.8em; font-weight:400;">HVAC Design Calc</span></h4>
+    
+    <div class="price-tag">
+        <span class="currency" style="color: #cbd5e0; font-weight: 500;">MOP</span>
+        <span class="amount" style="color: var(--hvac-color);">0</span>
+        
+        <div style="background: #f0fff4; color: var(--hvac-color); display: inline-block; padding: 4px 12px; border-radius: 4px; font-weight: 700; font-size: 1rem; vertical-align: middle; margin-left: 10px;">
+            試營運免費
+        </div>
+        
+        <span class="period" style="display: block; margin-top: 10px;">
+            <i class="fas fa-info-circle"></i> 需輸入優惠碼: <strong>VIP888</strong>
+        </span>
+    </div>
 
-                            <button onclick="RenoApp.doLogin()" class="btn btn-primary btn-block shadow-btn">
-                                立即開始 Start Now
-                            </button>
-                        </div>
+    <ul class="pricing-features">
+        <li><i class="fas fa-check-circle"></i> 冷量負荷估算 (Cooling Load)</li>
+        <li><i class="fas fa-check-circle"></i> 通風量計算 (Fresh Air)</li>
+        <li><i class="fas fa-check-circle"></i> 滿足食肆/場所發牌要求</li>
+        <li><i class="fas fa-file-pdf"></i> 生成 PDF 詳細計算書</li>
+    </ul>
 
-                        <div class="pricing-card coming-soon">
-                            <div class="pricing-icon gray">
-                                <i class="fas fa-wind"></i>
-                            </div>
-                            <h4>空調及通風設計<br><span style="font-size:0.8em; font-weight:400;">HVAC Design Calc</span></h4>
-                            
-                            <div class="price-tag">
-                                <span class="amount" style="font-size: 2rem;">敬請期待</span>
-                                <span class="period" style="display:block;">Coming Soon</span>
-                            </div>
-
-                            <ul class="pricing-features">
-                                <li><i class="fas fa-hourglass-half"></i> 冷量負荷估算 (Cooling Load)</li>
-                                <li><i class="fas fa-hourglass-half"></i> 通風量計算 (Fresh Air)</li>
-                                <li><i class="fas fa-hourglass-half"></i> 滿足食肆/場所發牌要求</li>
-                            </ul>
-
-                            <button class="btn btn-secondary btn-block" disabled style="opacity: 0.7; cursor: not-allowed;">
-                                開發中 Under Dev
-                            </button>
-                        </div>
+    <button onclick="RenoApp.doLogin()" class="btn btn-hvac btn-block shadow-btn">
+        立即開始 Start Now
+    </button>
+</div>
                     </div>
                 </section>
 
@@ -366,7 +420,7 @@
                     </button>
                 </div>
             </div>
-
+             
             <div class="sticky-input-bar">
                 <div class="input-group" style="flex: 1.4; min-width: 150px;">
                     <label>Device Type 設備類型</label>
@@ -530,6 +584,39 @@
                     </div>
                 </div>
             </div>
+
+            </div> 
+
+            <div class="action-bar" style="margin-top: 2rem; margin-bottom: 8rem; text-align: center;">
+    
+    <div class="premium-card" style="margin-top: 0;">
+        <div class="premium-content">
+            <h3><i class="fas fa-wind"></i> 解鎖 HVAC 專業報告</h3>
+            <p>獲取包含詳細冷負荷 (Cooling Load) 與通風量 (Fresh Air/Exhaust) 計算書的 <strong>PDF 報告</strong></p>
+            <ul>
+                <li>✅ 完整各房間負荷明細表</li>
+                <li>✅ 符合食肆/場所發牌通風要求</li>
+                <li>✅ 自動生成標準設計參數表</li>
+            </ul>
+            <div class="premium-price">
+                <span class="price">試營運免費 Unlock Now(Free)</span>
+            </div>
+            
+            <button onclick="RenoApp.handleExportRequest()" class="btn-premium btn-hvac-calc">
+                <i class="fas fa-unlock"></i> 立即解鎖 Unlock Now
+            </button>
+        </div>
+    </div>
+
+    <p style="margin-top: 1rem; color: #718096; font-size: 0.9rem;">
+        <i class="fas fa-info-circle"></i> 報告將包含詳細負荷計算書 (Detailed Load Schedule)
+    </p>
+</div>
+            <div class="sticky-input-bar" style="border-top-color: var(--hvac-color);">
+            ```
+
+### 驗證
+修改並儲存後，重新整理網頁。你應該會在 HVAC 列表的下方看到那顆銀色的 **「生成 HVAC 計算報告 (PDF)」** 按鈕。
             
             <div class="sticky-input-bar" style="border-top-color: var(--hvac-color);">
                 <div class="input-group" style="flex: 1; min-width: 200px;">
@@ -586,85 +673,122 @@
     <div id="guideModal" class="guide-modal-overlay">
         <div class="guide-modal-content">
             <div class="guide-header">
-                <h2><i class="fas fa-book"></i> 機電系統設計與核算指引 (v0)</h2>
+                <h2><i class="fas fa-book"></i> 機電系統設計與核算指引 (v1)</h2>
                 <button class="close-guide-btn" onclick="toggleGuide()">×</button>
             </div>
             <div class="guide-body">
-                <p style="color: #666; margin-bottom: 20px; font-size: 0.95rem; border-bottom: 1px solid #eee; padding-bottom: 10px;">
-                    本指引旨在協助用戶進行「初步機電需求評估」，內容基於澳門電力公司 (CEM) 標準及工程慣例。所有數據僅供參考。<br>
-                    <strong>版本：v0 (Beta)</strong>
-                </p>
+    <p style="color: #666; margin-bottom: 20px; font-size: 0.95rem; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+        本指引旨在協助用戶進行「初步機電需求評估」，內容基於澳門電力公司 (CEM) 標準及工程慣例。所有數據僅供參考。<br>
+        <strong>版本：v1.0 (Soft Launch)</strong>
+    </p>
 
-                <div class="guide-section-title">1. 電力核算模組 (Electrical Assessment)</div>
+    <div class="guide-section-title">1. 電力核算模組 (Electrical Assessment)</div>
 
-                <div class="alert-box info">
-                    <span class="alert-title"><i class="fas fa-info-circle"></i> 1.1 數據輸入原則</span>
-                    <p>用戶必須遵循真實設計意圖。切勿遺漏 <strong>高功率設備</strong>（如即熱式熱水爐、浴室寶等），否則運算模型將無法反映真實需求。</p>
-                </div>
+    <div class="alert-box info">
+        <span class="alert-title"><i class="fas fa-info-circle"></i> 1.1 數據輸入原則</span>
+        <p>用戶必須遵循真實設計意圖。切勿遺漏 <strong>高功率設備</strong>（如即熱式熱水爐、浴室寶等），否則運算模型將無法反映真實需求。</p>
+    </div>
 
-                <div class="alert-box danger">
-                    <span class="alert-title"><i class="fas fa-exclamation-triangle"></i> 1.2 關鍵迴路規劃 (Critical Planning)</span>
-                    
-                    <p style="margin-top: 10px; font-weight: bold; color: #c53030;">A. 廚房區域 (高負載重災區)</p>
-                    <ul>
-                        <li>🛑 <strong>獨立迴路：</strong>嵌入式焗爐 (3000W+) 及 高功率電磁爐 必須使用 <span class="highlight-text">獨立接線位</span>。</li>
-                        <li>✅ <strong>共用迴路：</strong>雪櫃、微波爐、抽氣扇可共用一組環形電路。</li>
-                    </ul>
+    <div class="alert-box danger">
+        <span class="alert-title"><i class="fas fa-exclamation-triangle"></i> 1.2 關鍵迴路規劃 (Critical Planning)</span>
+        
+        <p style="margin-top: 10px; font-weight: bold; color: #c53030;">A. 廚房區域 (高負載重災區)</p>
+        <ul>
+            <li>🛑 <strong>獨立迴路：</strong>嵌入式焗爐 (3000W+) 及 高功率電磁爐 必須使用 <span class="highlight-text">獨立接線位</span>。</li>
+            <li>✅ <strong>共用迴路：</strong>雪櫃、微波爐、抽氣扇可共用一組環形電路。</li>
+        </ul>
 
-                    <p style="margin-top: 15px; font-weight: bold; color: #c53030;">B. 浴室區域 (涉水環境)</p>
-                    <ul>
-                        <li><strong>即熱式電熱水爐：</strong>啟動功率極大，<span class="highlight-text">必須配置獨立迴路</span>，嚴禁與插座共用。</li>
-                        <li><strong>浴室寶：</strong>建議預留獨立 FSU (接線蘇) 供電。</li>
-                    </ul>
+        <p style="margin-top: 15px; font-weight: bold; color: #c53030;">B. 浴室區域 (涉水環境)</p>
+        <ul>
+            <li><strong>即熱式電熱水爐：</strong>啟動功率極大，<span class="highlight-text">必須配置獨立迴路</span>，嚴禁與插座共用。</li>
+            <li><strong>浴室寶：</strong>建議預留獨立 FSU (接線蘇) 供電。</li>
+        </ul>
 
-                    <p style="margin-top: 15px; font-weight: bold; color: #c53030;">C. 商業區域佈置</p>
-                    <ul>
-                        <li>建議將「銷售區」與「後勤區」照明分開，並為收銀系統設置獨立迴路。</li>
-                    </ul>
-                </div>
+        <p style="margin-top: 15px; font-weight: bold; color: #c53030;">C. 商業區域佈置</p>
+        <ul>
+            <li>建議將「銷售區」與「後勤區」照明分開，並為收銀系統設置獨立迴路。</li>
+        </ul>
+    </div>
 
-                <div class="alert-box warning">
-                    <span class="alert-title"><i class="fas fa-bolt"></i> 1.3 運算邏輯與校核</span>
-                    <ul>
-                        <li><strong>智能電壓降：</strong>當線路長度導致壓降超過標準（照明 3% / 電力 5%）時，系統會自動加大線徑。</li>
-                        <li><strong>供電模式：</strong>若系統建議「三相供電」，請即時檢查現有電錶。如僅為單相，必須申請加大供電。</li>
-                        <li><strong>引入線評估：</strong>強烈建議在裝修前，聘請 <strong>合資格人員</strong> 評估大廈引入線 (In-coming Cable) 的升級潛力。</li>
-                    </ul>
-                </div>
+    <div class="alert-box warning">
+        <span class="alert-title"><i class="fas fa-bolt"></i> 1.3 運算邏輯與校核</span>
+        <ul>
+            <li><strong>智能電壓降：</strong>當線路長度導致壓降超過標準（照明 3% / 電力 5%）時，系統會自動加大線徑。</li>
+            <li><strong>供電模式：</strong>若系統建議「三相供電」，請即時檢查現有電錶。如僅為單相，必須申請加大供電。</li>
+            <li><strong>引入線評估：</strong>強烈建議在裝修前，聘請 <strong>合資格人員</strong> 評估大廈引入線 (In-coming Cable) 的升級潛力。</li>
+        </ul>
+    </div>
 
-                <div class="guide-section-title" style="margin-top: 40px;">2. 空調與通風規劃 (HVAC Planning)</div>
+    <div class="guide-section-title" style="margin-top: 40px;">2. 空調與通風規劃 (HVAC Planning)</div>
 
-                <div class="alert-box info">
-                    <span class="alert-title"><i class="fas fa-wind"></i> 2.1 估算與輸入</span>
-                    <ul>
-                        <li><strong>冷量計算：</strong>系統採用「單位面積熱負荷法」估算。若樓底超過 3.0米 或有西斜玻璃幕牆，建議手動選擇較大匹數。</li>
-                        <li><strong>分體式冷氣：</strong>請輸入「室外機」數量（主要負載來源）。</li>
-                        <li><strong>VRV 系統：</strong>請分別輸入「VRV室外機」與「VRV室內機」。系統會自動為室外機配置獨立供電。</li>
-                    </ul>
-                </div>
+    <div class="alert-box warning">
+        <span class="alert-title"><i class="fas fa-list-ul"></i> 2.1 房間用途選擇 (關鍵一步)</span>
+        <p>系統內建不同場所的「發熱量標準」，請勿隨意選擇。錯誤的選擇會導致冷氣「不夠凍」！</p>
+        <ul style="margin-top: 8px;">
+            <li>🔥 <strong>高熱量場所：</strong>如 <span class="highlight-text">廚房 (Kitchen)</span>、<span class="highlight-text">機房 (Server Room)</span>。系統會自動加大冷量計算，請務必如實選擇。</li>
+            <li>🍽️ <strong>人流密集：</strong>如 <span class="highlight-text">餐廳 (Dining)</span>、<span class="highlight-text">會議室 (Meeting)</span>。系統會根據「人數」計算大量鮮風負荷 (牌照重點)。</li>
+            <li>💇‍♀️ <strong>特殊場所：</strong>如 <span class="highlight-text">美容院/診所</span>。系統預設會同時開啟鮮風與排風要求。</li>
+        </ul>
+    </div>
 
-                <div class="alert-box info">
-                    <span class="alert-title"><i class="fas fa-fan"></i> 2.2 通風合規性</span>
-                    <ul>
-                        <li><strong>鮮風 (Fresh Air)：</strong>人員長期逗留區域（如辦公室）建議引入鮮風。</li>
-                        <li><strong>排風 (Exhaust Air)：</strong>廁所及廚房 <strong>必須</strong> 配置機械排風系統。</li>
-                    </ul>
-                </div>
+    <div class="alert-box info">
+        <span class="alert-title"><i class="fas fa-snowflake"></i> 2.2 冷量 (Cooling Load) 與環境因素</span>
+        <p>本系統基於「標準工況」計算。如現場環境惡劣，建議在計算結果基礎上 <strong>手動加大 15-20%</strong>：</p>
+        <ul style="margin-top: 8px;">
+            <li>☀️ <strong>西斜 (West Facing)：</strong>大面積玻璃窗面向西邊，下午陽光直射。</li>
+            <li>🏠 <strong>頂層 (Roof Floor)：</strong>位於大廈最高層，天台受熱直接傳導至室內。</li>
+            <li>📏 <strong>超高樓底：</strong>樓底高度超過 3.5米 (標準為 3.0米)，需處理的空氣體積更大。</li>
+        </ul>
+        <p style="margin-top:10px; font-size: 0.9em; color:#2c5282;">
+            <strong>*備註：</strong>系統顯示的 HP (匹數) 為該空間所需的 <span style="text-decoration: underline;">總製冷能力</span>。您可自由組合 (例：需求 4匹，可選用 2部 2匹分體機)。
+        </p>
+    </div>
 
-                <div class="guide-section-title" style="margin-top: 40px;">3. 責任聲明 (Disclaimer)</div>
+    <div class="alert-box danger">
+        <span class="alert-title"><i class="fas fa-wind"></i> 2.3 鮮風與排風 (Ventilation) - 法規重點</span>
+        <p>這是申請牌照 (如食肆、補習社) 最容易被退件的部分，請注意：</p>
+        
+        <div style="margin-top: 10px;">
+            <strong>🟢 鮮風 (Fresh Air - FA)：即「抽入室外空氣」</strong>
+        </div>
+        <ul style="margin-bottom: 10px;">
+            <li><strong>適用：</strong>無窗房間、人員長期逗留區 (辦公室、課室)。</li>
+            <li><strong>法規：</strong>請準確輸入 <span class="highlight-text">預計人數</span>，系統會按澳門法規自動計算所需風量 (L/s)。</li>
+        </ul>
 
-                <div class="alert-box" style="background: #f7fafc; border-left-color: #718096; color: #4a5568;">
-                    <span class="alert-title" style="color: #2d3748;"><i class="fas fa-gavel"></i> 使用條款</span>
-                    <ol style="padding-left: 20px; margin-top: 10px;">
-                        <li style="margin-bottom: 8px;"><strong>非施工圖則：</strong>本系統數據僅屬「工程可行性研究」性質。所有技術參數須經現場實地考察，並由 <strong>澳門註冊機電工程師</strong> 覆核及簽署後，方可用於申報或施工。</li>
-                        <li style="margin-bottom: 8px;"><strong>用戶責任：</strong>運算準確性依賴用戶輸入。如因遺漏高功率設備或錯誤定義房間用途而導致供電不足，開發團隊不承擔責任。</li>
-                    </ol>
-                </div>
+        <div>
+            <strong>🔴 排風 (Exhaust Air - EA)：即「抽出室內空氣」</strong>
+        </div>
+        <ul>
+            <li><strong>適用：</strong>產生異味或熱氣的區域 (廁所、茶水間、廚房)。</li>
+            <li><strong>重油煙警示：</strong>本系統計算一般通風。如廚房涉及 <span class="highlight-text">重油煙</span> (明火煮食)，必須配置獨立油煙處理系統，不可僅依賴此計算。</li>
+        </ul>
+    </div>
 
-                <button class="btn-understand" onclick="toggleGuide()">
-                    我已閱讀並理解 (I Understand)
-                </button>
-            </div>
+    <div class="alert-box info" style="background-color: #f0fff4; border-left-color: #38a169;">
+        <span class="alert-title" style="color: #2f855a;"><i class="fas fa-lightbulb"></i> 2.4 輸入小貼士 (Tips)</span>
+        <ul>
+            <li><strong>人數 (People)：</strong>若不確定，可按 <span class="highlight-text">面積 / 3</span> 估算 (例如 30m² ≈ 10人)。</li>
+            <li><strong>高度 (Height)：</strong>指「假天花」下的淨高度。如無假天花，則算至樓板底。</li>
+            <li><strong>開放式廚房：</strong>請將「廚房區」與「用餐區」分開兩行輸入，因為兩者的通風標準完全不同。</li>
+        </ul>
+    </div>
+
+    <div class="guide-section-title" style="margin-top: 40px;">3. 責任聲明 (Disclaimer)</div>
+
+    <div class="alert-box" style="background: #f7fafc; border-left-color: #718096; color: #4a5568;">
+        <span class="alert-title" style="color: #2d3748;"><i class="fas fa-gavel"></i> 使用條款</span>
+        <ol style="padding-left: 20px; margin-top: 10px;">
+            <li style="margin-bottom: 8px;"><strong>非施工圖則：</strong>本系統數據僅屬「工程可行性研究」性質。所有技術參數須經現場實地考察，並由 <strong>澳門註冊機電工程師</strong> 覆核及簽署後，方可用於申報或施工。</li>
+            <li style="margin-bottom: 8px;"><strong>用戶責任：</strong>運算準確性依賴用戶輸入。如因遺漏高功率設備或錯誤定義房間用途而導致供電不足，開發團隊不承擔責任。</li>
+        </ol>
+    </div>
+
+    <button class="btn-understand" onclick="toggleGuide()">
+        我已閱讀並理解 (I Understand)
+    </button>
+</div>
+        
         </div>
     </div>
 

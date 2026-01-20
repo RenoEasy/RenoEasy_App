@@ -34,107 +34,131 @@ const HVACModule = {
     },
 
     // 3. [核心升級] 新增項目 (呼叫 Supabase 雲端計算)
-    addItem: async function() {
-        // A. 獲取輸入
-        const typeEl = document.getElementById('hvac-type');
-        const areaEl = document.getElementById('hvac-area');
-        const heightEl = document.getElementById('hvac-height');
-        const peopleEl = document.getElementById('hvac-people');
-
-        if (!typeEl || !areaEl || !heightEl || !peopleEl) return;
-
-        // B. 驗證
-        if (!typeEl.value || !areaEl.value) {
-            if (typeof RenoApp !== 'undefined' && RenoApp.showCustomModal) {
-                await RenoApp.showCustomModal("資料不全", "請輸入類型與面積", false);
-            } else {
-                alert("請完整輸入類型與面積");
-            }
-            return;
+    // [修改] hvac.js
+// [修正] hvac.js - addItem (修正變數未定義錯誤 + 保持 dev 函數名稱)
+addItem: async function() {
+    // 1. [核心修改] 嚴格限制空間數量 (Small Project Limit)
+    const MAX_ITEMS = 5; 
+    
+    if (this.items.length >= MAX_ITEMS) {
+        if (typeof RenoApp !== 'undefined') {
+            await RenoApp.showCustomModal(
+                "達到空間上限 Limit Reached", 
+                "⚠️ 本系統專為小型工程 (<69kVA) 設計。\n單一專案最多支援 5 個空間計算。\n\n如需計算更多空間，請建立新專案。", 
+                false
+            );
+        } else {
+            alert("已達到空間數量上限 (Max 5 Rooms)");
         }
+        return; // ⛔ 阻止繼續執行
+    }
 
-        // C. 準備數據包 (Payload)
-        const inputPayload = {
-            key: typeEl.value,
-            area: parseFloat(areaEl.value),
-            height: parseFloat(heightEl.value) || 3.0,
-            people: parseFloat(peopleEl.value) || 0
+    // 2. [補回] 獲取 HTML 輸入框元素 (DOM Elements) - 這是之前報錯缺失的部分
+    const typeEl = document.getElementById('hvac-type');
+    const areaEl = document.getElementById('hvac-area');
+    const heightEl = document.getElementById('hvac-height');
+    const peopleEl = document.getElementById('hvac-people');
+
+    // 3. [補回] 基礎驗證 (Validation)
+    if (!typeEl || !typeEl.value) {
+        if (typeof RenoApp !== 'undefined') await RenoApp.showCustomModal("提示", "請選擇房間用途", false);
+        else alert("請選擇房間用途");
+        return;
+    }
+    
+    if (!areaEl || !areaEl.value || parseFloat(areaEl.value) <= 0) {
+        if (typeof RenoApp !== 'undefined') await RenoApp.showCustomModal("提示", "請輸入有效的面積", false);
+        else alert("請輸入有效的面積");
+        return;
+    }
+
+    // C. 準備數據包 (Payload)
+    const inputPayload = {
+        key: typeEl.value,
+        area: parseFloat(areaEl.value),
+        height: parseFloat(heightEl.value) || 3.0,
+        people: parseFloat(peopleEl.value) || 0
+    };
+
+    // D. UI 鎖定 (Loading)
+    // 嘗試抓取按鈕，確保不會因為找不到按鈕而報錯
+    const btn = document.querySelector('.sticky-input-bar button') || document.querySelector('.btn-hvac');
+    let oldText = "計算 Calc";
+    if (btn) {
+        oldText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        btn.disabled = true;
+    }
+
+    try {
+        console.log("呼叫 HVAC 雲端計算 (DEV)...");
+
+        // E. 發送請求 (Action: hvac)
+        // ✅ [確認] 使用 calculate-project
+        const { data, error } = await supabaseClient.functions.invoke('calculate-project', {
+            body: { 
+                action: 'hvac',         // 告訴後端這是 HVAC 請求
+                inputs: [inputPayload]  // 放入陣列
+            }
+        });
+
+        if (error) throw error;
+        if (!data || data.length === 0) throw new Error("無回傳數據");
+
+        const cloudResult = data[0]; // 取回結果
+
+        // F. 格式化顯示 (加上樣式)
+        const displayItem = {
+            id: Date.now(),
+            
+            // ✅ 確保詳細數據存在，用於生成 PDF
+            detailedLoad: cloudResult.detailedLoad, 
+
+            label: cloudResult.label,
+            A: cloudResult.area,
+            Ppl: cloudResult.people,
+                             
+            // 冷量樣式 (藍色粗體)
+            strCooling: cloudResult.coolingHP > 0 
+                ? `<span style="font-weight:700; color:#2c5282;">${cloudResult.coolingHPDisplay}</span>` 
+                : "<span style='color:#cbd5e0'>-</span>",
+            
+            // 鮮風樣式 (綠色打勾 或 灰色)
+            strFA: cloudResult.requiresFreshAir 
+                ? `<span class="text-success" style="font-weight:700; font-size:1.1em;"><i class="fas fa-check-circle"></i> ${cloudResult.freshAirDisplay}</span>`
+                : `<span style="color:#cbd5e0; font-weight:500;">${cloudResult.freshAirDisplay}</span>`,
+            
+            // 排風樣式
+            strEA: cloudResult.requiresExhaust
+                ? `<span class="text-success" style="font-weight:700; font-size:1.1em;"><i class="fas fa-check-circle"></i> ${cloudResult.exhaustDisplay}</span>`
+                : `<span style="color:#cbd5e0; font-weight:500;">${cloudResult.exhaustDisplay}</span>`
         };
 
-        // D. UI 鎖定 (Loading)
-        const btn = document.querySelector('#page-hvac .input-group button');
-        let oldText = "計算 Calc";
+        // G. 更新列表
+        this.items.push(displayItem);
+        this.syncToApp();
+        this.renderTable();
+        
+        // 重置輸入框
+        areaEl.value = '';
+        peopleEl.value = '0';
+        areaEl.focus();
+
+    } catch (err) {
+        console.error("HVAC Error:", err);
+        const msg = err.message || String(err);
+        if (typeof RenoApp !== 'undefined' && RenoApp.showCustomModal) {
+            await RenoApp.showCustomModal("計算失敗", "雲端錯誤: " + msg, false);
+        } else {
+            alert("計算失敗: " + msg);
+        }
+    } finally {
         if (btn) {
-            oldText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            btn.disabled = true;
+            btn.innerHTML = oldText;
+            btn.disabled = false;
         }
-
-        try {
-            console.log("呼叫 HVAC 雲端計算...");
-
-            // E. 發送請求 (Action: hvac)
-            const { data, error } = await supabaseClient.functions.invoke('calculate-project', {
-                body: { 
-                    action: 'hvac',         // 告訴後端這是 HVAC 請求
-                    inputs: [inputPayload]  // 放入陣列
-                }
-            });
-
-            if (error) throw error;
-            if (!data || data.length === 0) throw new Error("無回傳數據");
-
-            const cloudResult = data[0]; // 取回結果
-
-            // F. 格式化顯示 (加上樣式)
-            // 後端回傳的是純文字，前端負責「化妝」
-            const displayItem = {
-                id: Date.now(),
-                label: cloudResult.label,
-                A: cloudResult.area,
-                Ppl: cloudResult.people,
-                
-                // 冷量樣式 (藍色粗體)1
-                strCooling: cloudResult.coolingHP > 0 
-                    ? `<span style="font-weight:700; color:#2c5282;">${cloudResult.coolingHPDisplay}</span>` 
-                    : "<span style='color:#cbd5e0'>-</span>",
-                
-                // 鮮風樣式 (綠色打勾 或 灰色)
-                strFA: cloudResult.requiresFreshAir 
-                    ? `<span class="text-success" style="font-weight:700; font-size:1.1em;"><i class="fas fa-check-circle"></i> ${cloudResult.freshAirDisplay}</span>`
-                    : `<span style="color:#cbd5e0; font-weight:500;">${cloudResult.freshAirDisplay}</span>`,
-                
-                // 排風樣式
-                strEA: cloudResult.requiresExhaust
-                    ? `<span class="text-success" style="font-weight:700; font-size:1.1em;"><i class="fas fa-check-circle"></i> ${cloudResult.exhaustDisplay}</span>`
-                    : `<span style="color:#cbd5e0; font-weight:500;">${cloudResult.exhaustDisplay}</span>`
-            };
-
-            // G. 更新列表
-            this.items.push(displayItem);
-            this.syncToApp();
-            this.renderTable();
-            
-            // 重置輸入框
-            areaEl.value = '';
-            peopleEl.value = '0';
-            areaEl.focus();
-
-        } catch (err) {
-            console.error("HVAC Error:", err);
-            const msg = err.message || String(err);
-            if (typeof RenoApp !== 'undefined' && RenoApp.showCustomModal) {
-                await RenoApp.showCustomModal("計算失敗", "雲端錯誤: " + msg, false);
-            } else {
-                alert("計算失敗: " + msg);
-            }
-        } finally {
-            if (btn) {
-                btn.innerHTML = oldText;
-                btn.disabled = false;
-            }
-        }
-    },
+    }
+},
 
     removeItem: function(id) {
         this.items = this.items.filter(item => item.id !== id);
