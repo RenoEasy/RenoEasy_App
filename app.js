@@ -1875,12 +1875,10 @@ generateHVACReportCanvas: function(item, projectName, roomIndex, totalRooms) {
         ctx.fillStyle = COLOR_HEADER_BG;
         ctx.fillRect(margin, y, tableWidth, 50);
         
-        // 繪製表頭邊框
         ctx.strokeStyle = COLOR_BORDER;
         ctx.lineWidth = 2;
         ctx.strokeRect(margin, y, tableWidth, 50);
         
-        // 表頭文字
         ctx.fillStyle = '#000000';
         ctx.font = 'bold 28px Arial';
         const col1 = margin + 20;
@@ -1897,49 +1895,51 @@ generateHVACReportCanvas: function(item, projectName, roomIndex, totalRooms) {
         
         y += 50;
         
-        // 繪製表格內容（使用 REPORT_SCHEMA）
-        const rows = [
+        // 繪製表格內容
+        let rows = [
             { en: 'Outdoor Condition', zh: '室外設計工況', summer: `${data.design_params.outdoor_temp_db} / ${data.design_params.outdoor_temp_wb}`, winter: '7', unit: '°C DB/WB' },
             { en: 'Specific Enthalpy of Outdoor Air', zh: '室外焓值', summer: data.design_params.outdoor_enthalpy.toFixed(2), winter: '--', unit: 'kJ/kg' },
             { en: 'Indoor Temperature', zh: '設計室內溫度', summer: data.design_params.indoor_temp, winter: '', unit: '°C' },
             { en: 'Indoor RH', zh: '設計室內濕度', summer: data.design_params.indoor_rh, winter: '', unit: 'RH' },
             { en: 'Specific Enthalpy of Indoor Air', zh: '設計室內焓值', summer: data.design_params.indoor_enthalpy.toFixed(2), winter: '', unit: 'kJ/kg' },
             { en: 'Area', zh: '空間面積', summer: item.A, winter: '', unit: 'm²' },
+            
+            // [修改重點] 這裡定義原始資料，稍後會過濾
             { en: 'Fresh Air Rate', zh: '新風量標準(Min.)', summer: data.design_params.fresh_air_rate, winter: '', unit: 'L/s/person' },
+            
             { en: 'Exhaust Air Rate', zh: '排風量標準(Min.)', summer: data.design_params.exhaust_air_rate, winter: '', unit: 'ACH' },
             { en: 'Lighting', zh: '燈光密度', summer: data.design_params.lighting_density, winter: '', unit: 'W/m²' },
             { en: 'Equip.', zh: '設備密度', summer: data.design_params.equipment_density, winter: '', unit: 'W/m²' }
         ];
+
+        // [關鍵邏輯] 如果 Rate 為 0 (如廚房)，從列表中移除 "Fresh Air Rate" 這一行
+        if (data.design_params.fresh_air_rate === 0) {
+            rows = rows.filter(r => r.en !== 'Fresh Air Rate');
+        }
         
         ctx.font = '24px Arial';
         const rowHeight = 50;
         
         rows.forEach((row, idx) => {
-            // 背景（奇偶行）
-            if (idx % 2 === 0) {
-                ctx.fillStyle = '#ffffff';
-            } else {
-                ctx.fillStyle = '#f9f9f9';
-            }
-            ctx.fillRect(margin, y, tableWidth, rowHeight);
+            if (idx % 2 === 0) ctx.fillStyle = '#ffffff';
+            else ctx.fillStyle = '#f9f9f9';
             
-            // 邊框
+            ctx.fillRect(margin, y, tableWidth, rowHeight);
             ctx.strokeStyle = COLOR_BORDER;
             ctx.strokeRect(margin, y, tableWidth, rowHeight);
             
-            // 文字
             ctx.fillStyle = '#000000';
             ctx.fillText(row.en, col1, y + 33);
             ctx.fillText(row.zh, col2, y + 33);
             
-            // 判斷是否需要合併 Summer/Winter 欄
-            // 從第3行 (Indoor Temperature, idx=2) 開始合併
-            if (idx >= 2) {
-                // 合併顯示（跨 Summer + Winter 欄）
+            // 處理合併欄位 (從 Indoor Temperature 開始)
+            // 注意：因為我們動態移除了一行，所以 idx 會變動，我們用屬性名判斷更安全
+            const isMerged = ['Indoor Temperature', 'Indoor RH', 'Specific Enthalpy of Indoor Air'].includes(row.en);
+            
+            if (isMerged || idx >= 2) { 
                 ctx.fillText(String(row.summer), col3, y + 33);
                 ctx.fillText(row.unit, col5, y + 33);
             } else {
-                // 前兩行保持分開顯示
                 ctx.fillText(String(row.summer), col3, y + 33);
                 ctx.fillText(String(row.winter), col4, y + 33);
                 ctx.fillText(row.unit, col5, y + 33);
@@ -1959,7 +1959,6 @@ generateHVACReportCanvas: function(item, projectName, roomIndex, totalRooms) {
         const COLOR_PRIMARY = '#003399';
         const COLOR_HEADER_BG = '#f0f0f0';
         const COLOR_BORDER = '#cccccc';
-        const COLOR_HIGHLIGHT = '#e6f7ff';
         
         // 標題
         ctx.fillStyle = COLOR_PRIMARY;
@@ -1997,6 +1996,10 @@ generateHVACReportCanvas: function(item, projectName, roomIndex, totalRooms) {
         
         y += 50;
         
+        // [關鍵邏輯] 動態命名
+        const isMakeupMode = data.design_params.fresh_air_rate === 0;
+        const freshAirLabel = isMakeupMode ? '5. Make-up Air Load (補風負荷)' : '5. Fresh Air Load (新風負荷)';
+
         // 數據行
         const rows = [
             { 
@@ -2004,25 +2007,25 @@ generateHVACReportCanvas: function(item, projectName, roomIndex, totalRooms) {
                 sensible: data.load_summary.glass_radiation.sensible + data.load_summary.glass_conduction.sensible + data.load_summary.wall_roof.sensible,
                 latent: '-',
                 total: data.load_summary.glass_radiation.total + data.load_summary.glass_conduction.total + data.load_summary.wall_roof.total,
-                isBold: false, isHighlight: false
+                isBold: false 
             },
-            { label: '2. People (人員)', sensible: data.load_summary.people.sensible, latent: data.load_summary.people.latent, total: data.load_summary.people.total, isBold: false, isHighlight: false },
-            { label: '3. Lighting (燈光)', sensible: data.load_summary.lighting.sensible, latent: '-', total: data.load_summary.lighting.total, isBold: false, isHighlight: false },
-            { label: '4. Equipment (設備)', sensible: data.load_summary.equipment.sensible, latent: '-', total: data.load_summary.equipment.total, isBold: false, isHighlight: false },
-            { label: '5. Fresh Air Load (新風負荷)', sensible: data.load_summary.fresh_air.sensible, latent: data.load_summary.fresh_air.latent, total: data.load_summary.fresh_air.total, isBold: false, isHighlight: false },
-            { label: 'Sub-Total (Room Load)', sensible: data.load_summary.subtotal.sensible, latent: data.load_summary.subtotal.latent, total: data.load_summary.subtotal.total, isBold: true, isHighlight: false },
-            { label: 'GRAND TOTAL (Peak Load)', sensible: data.load_summary.grand_total.sensible, latent: data.load_summary.grand_total.latent, total: data.load_summary.grand_total.total, isBold: true, isHighlight: true }
+            { label: '2. People (人員)', sensible: data.load_summary.people.sensible, latent: data.load_summary.people.latent, total: data.load_summary.people.total, isBold: false },
+            { label: '3. Lighting (燈光)', sensible: data.load_summary.lighting.sensible, latent: '-', total: data.load_summary.lighting.total, isBold: false },
+            { label: '4. Equipment (設備)', sensible: data.load_summary.equipment.sensible, latent: '-', total: data.load_summary.equipment.total, isBold: false },
+            
+            // [應用] 使用動態標籤
+            { label: freshAirLabel, sensible: data.load_summary.fresh_air.sensible, latent: data.load_summary.fresh_air.latent, total: data.load_summary.fresh_air.total, isBold: false },
+            
+            { label: 'Sub-Total (Room Load)', sensible: data.load_summary.subtotal.sensible, latent: data.load_summary.subtotal.latent, total: data.load_summary.subtotal.total, isBold: true },
+            { label: 'GRAND TOTAL (Peak Load)', sensible: data.load_summary.grand_total.sensible, latent: data.load_summary.grand_total.latent, total: data.load_summary.grand_total.total, isBold: true }
         ];
         
         const rowHeight = 50;
         
         rows.forEach((row) => {
-            
-            // 邊框
             ctx.strokeStyle = COLOR_BORDER;
             ctx.strokeRect(margin, y, tableWidth, rowHeight);
             
-            // 文字
             ctx.fillStyle = '#000000';
             ctx.font = row.isBold ? 'bold 26px Arial' : '24px Arial';
             ctx.fillText(row.label, col1, y + 33);
@@ -2039,14 +2042,13 @@ generateHVACReportCanvas: function(item, projectName, roomIndex, totalRooms) {
     },
     
     // Section 3: Equipment Sizing 繪製
+    // Section 3: Equipment Sizing 繪製 (V2.2 - Pure Exhaust Logic)
     drawHVACSection3: function(ctx, data, startY, margin, tableWidth) {
         let y = startY;
         const COLOR_PRIMARY = '#003399';
         const COLOR_HEADER_BG = '#f0f0f0';
         const COLOR_BORDER = '#cccccc';
         const COLOR_GREEN = '#d4edda';
-        const COLOR_BLUE = '#e6f7ff';
-        const COLOR_YELLOW = '#fff3cd';
         
         // 標題
         ctx.fillStyle = COLOR_PRIMARY;
@@ -2074,70 +2076,57 @@ generateHVACReportCanvas: function(item, projectName, roomIndex, totalRooms) {
         ctx.fillText('Unit', col3, y + 35);
         
         y += 50;
-        
         const rowHeight = 50;
-        
         
         // A. Cooling Capacity
         this.drawEquipmentRow(ctx, margin, tableWidth, y, 'A. Cooling Capacity (製冷量)', '', '', '#f9f9f9', true);
         y += rowHeight;
-        
         this.drawEquipmentRow(ctx, margin, tableWidth, y, 'Grand Total Load (峰值總負荷)', data.equipment_sizing.cooling.grand_total_w, 'W', '#ffffff', false);
         y += rowHeight;
-        
         this.drawEquipmentRow(ctx, margin, tableWidth, y, 'Safety Factor (安全係數)', `${data.equipment_sizing.cooling.safety_factor}%`, '', '#ffffff', false);
         y += rowHeight;
-        
         this.drawEquipmentRow(ctx, margin, tableWidth, y, 'Required Cooling Capacity (需求製冷量)', data.equipment_sizing.cooling.required_kw, 'kW', COLOR_GREEN, true);
         y += rowHeight;
         
-        
-        // B. Supply Air Flow Rate (送風量計算)
+        // B. Supply Air Flow Rate
         this.drawEquipmentRow(ctx, margin, tableWidth, y, 'B. Supply Air Flow Rate (送風量計算)', '', '', '#f9f9f9', true);
         y += rowHeight;
-        
         this.drawEquipmentRow(ctx, margin, tableWidth, y, 'Room Sensible Load (房間顯熱)', data.equipment_sizing.airflow.room_sensible_w, 'W', '#ffffff', false);
         y += rowHeight;
-        
         this.drawEquipmentRow(ctx, margin, tableWidth, y, 'Supply Air dT (送風溫差)', data.equipment_sizing.airflow.supply_air_dt, 'K', '#ffffff', false);
         y += rowHeight;
-        
         this.drawEquipmentRow(ctx, margin, tableWidth, y, 'Air Density x Specific Heat (空氣密度×比熱)', data.equipment_sizing.airflow.air_density_cp, '', '#ffffff', false);
         y += rowHeight;
-        
         this.drawEquipmentRow(ctx, margin, tableWidth, y, 'Required Supply Air Flow (需求送風量)', data.equipment_sizing.airflow.required_cmh, 'CMH', COLOR_GREEN, true);
         y += rowHeight;
         
-        // C. Fresh Air Requirement (新風需求)
-        if (data.equipment_sizing.fresh_air.required_cmh > 0) {
-        this.drawEquipmentRow(ctx, margin, tableWidth, y, 'C. Fresh Air Requirement (新風需求)', '', '', '#f9f9f9', true);
-        y += rowHeight;
-        
-        this.drawEquipmentRow(ctx, margin, tableWidth, y, 'Number of People (人數)', data.equipment_sizing.fresh_air.number_of_people, 'person', '#ffffff', false);
-        y += rowHeight;
-        
-        this.drawEquipmentRow(ctx, margin, tableWidth, y, 'Fresh Air Rate (人均新風)', data.equipment_sizing.fresh_air.fresh_air_rate, 'L/s/person', '#ffffff', false);
-        y += rowHeight;
-        
-        this.drawEquipmentRow(ctx, margin, tableWidth, y, 'Required Fresh Air (需求新風量)', data.equipment_sizing.fresh_air.required_cmh, 'CMH', COLOR_GREEN, true);
-        y += rowHeight;
+        // [修正重點] C. Fresh Air Requirement
+        // 邏輯：只有在 "有人員鮮風需求" (Rate > 0) 時才顯示此區塊。
+        // 廚房 (Rate === 0) 雖然有補風量 (Required CMH > 0)，但不在此處顯示，以免誤導。
+        const showFreshAirSection = data.equipment_sizing.fresh_air.required_cmh > 0 && data.design_params.fresh_air_rate > 0;
+
+        if (showFreshAirSection) {
+            this.drawEquipmentRow(ctx, margin, tableWidth, y, 'C. Fresh Air Requirement (新風需求)', '', '', '#f9f9f9', true);
+            y += rowHeight;
+            this.drawEquipmentRow(ctx, margin, tableWidth, y, 'Number of People (人數)', data.equipment_sizing.fresh_air.number_of_people, 'person', '#ffffff', false);
+            y += rowHeight;
+            this.drawEquipmentRow(ctx, margin, tableWidth, y, 'Fresh Air Rate (人均新風)', data.equipment_sizing.fresh_air.fresh_air_rate, 'L/s/person', '#ffffff', false);
+            y += rowHeight;
+            this.drawEquipmentRow(ctx, margin, tableWidth, y, 'Required Fresh Air (需求新風量)', data.equipment_sizing.fresh_air.required_cmh, 'CMH', COLOR_GREEN, true);
+            y += rowHeight;
         }
         
-        // D. Exhaust Air Flow Rate (排風量計算)
-        // 排風區塊（動態編號：有新風時為 D，無新風時為 C）
+        // D/C. Exhaust Air Flow Rate
+        // 如果有排風需求，則顯示。編號會自動根據上方是否有 Fresh Air 區塊調整 (D 或 C)
         if (data.equipment_sizing.exhaust.required_cmh > 0) {
-        const exhaustLabel = data.equipment_sizing.fresh_air.required_cmh > 0 
-        ? 'D. Exhaust Air Flow Rate (排風量計算)' 
-        : 'C. Exhaust Air Flow Rate (排風量計算)';
-        this.drawEquipmentRow(ctx, margin, tableWidth, y, exhaustLabel, '', '', '#f9f9f9', true);
-            y += rowHeight;
+            const sectionLabel = showFreshAirSection ? 'D. Exhaust Air Flow Rate (排風量計算)' : 'C. Exhaust Air Flow Rate (排風量計算)';
             
+            this.drawEquipmentRow(ctx, margin, tableWidth, y, sectionLabel, '', '', '#f9f9f9', true);
+            y += rowHeight;
             this.drawEquipmentRow(ctx, margin, tableWidth, y, 'Volume (空間體積)', data.equipment_sizing.exhaust.volume_m3, 'm3', '#ffffff', false);
             y += rowHeight;
-            
             this.drawEquipmentRow(ctx, margin, tableWidth, y, 'Air Change Rate (排風量標準)', data.equipment_sizing.exhaust.ach, 'ACH', '#ffffff', false);
             y += rowHeight;
-            
             this.drawEquipmentRow(ctx, margin, tableWidth, y, 'Required Exhaust Air Flow (需求排風量)', data.equipment_sizing.exhaust.required_cmh, 'CMH', COLOR_GREEN, true);
         }
     },
