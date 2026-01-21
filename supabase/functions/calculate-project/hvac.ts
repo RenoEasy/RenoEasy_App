@@ -297,7 +297,8 @@ function calculateSpace(input: HVACInput): HVACResult | null {
         indoor_temp: INDOOR_TEMP,
         indoor_rh: 55,
         indoor_enthalpy: INDOOR_ENTHALPY,
-        fresh_air_rate: fresh_air_rate,
+        // [修正] 如果不需要鮮風，強制回傳 0
+        fresh_air_rate: requiresFreshAir ? fresh_air_rate : 0, 
         exhaust_air_rate: requiresExhaust ? "10 ACH" : "N/A",
         occupancy_density: defaults.std_occ_density,
         lighting_density: defaults.std_light_density,
@@ -351,8 +352,7 @@ function calculateSpace(input: HVACInput): HVACResult | null {
         },
         fresh_air: {
             number_of_people: people,
-            // [修正] 如果該房間不需要人員鮮風 (如廚房)，率顯示為 0
-            // 這樣報告就會顯示 "Fresh Air Rate: 0"，但 "Required CMH: 3000"，代表這是純補風
+            // [修正] 同步修正這裡，讓前端 Section 3 也能隱藏
             fresh_air_rate: requiresFreshAir ? fresh_air_rate : 0,
             required_ls: Math.round(effective_fa_ls),
             required_cmh: Math.round(effective_fa_ls * 3.6)
