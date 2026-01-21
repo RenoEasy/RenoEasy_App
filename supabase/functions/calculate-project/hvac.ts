@@ -351,7 +351,9 @@ function calculateSpace(input: HVACInput): HVACResult | null {
         },
         fresh_air: {
             number_of_people: people,
-            fresh_air_rate: fresh_air_rate,
+            // [修正] 如果該房間不需要人員鮮風 (如廚房)，率顯示為 0
+            // 這樣報告就會顯示 "Fresh Air Rate: 0"，但 "Required CMH: 3000"，代表這是純補風
+            fresh_air_rate: requiresFreshAir ? fresh_air_rate : 0,
             required_ls: Math.round(effective_fa_ls),
             required_cmh: Math.round(effective_fa_ls * 3.6)
         },
