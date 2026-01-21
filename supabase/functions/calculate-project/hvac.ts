@@ -161,9 +161,8 @@ function calculateSpace(input: HVACInput): HVACResult | null {
     // ------------------------------------------------------------------------
     // A. Constants & Config
     // ------------------------------------------------------------------------
-    const CP_AIR = 1.025; // Adjusted to match Excel reverse engineering
+    const CP_AIR = 1.025; 
     const INDOOR_TEMP = 22;
-    // User requested Enthalpy to 2 decimal places for these constants
     const INDOOR_ENTHALPY = 45.15;
     const OUTDOOR_ENTHALPY_MAX = 95.05;
 
@@ -178,7 +177,6 @@ function calculateSpace(input: HVACInput): HVACResult | null {
 
     const area = parseFloat(String(input.area)) || 0;
     const height = parseFloat(String(input.height ?? 3.0)) || 3.0;
-    // If user inputs 0, load is 0 (User Responsibility)
     const people = parseFloat(String(input.people ?? 0)) || 0;
 
     if (area <= 0) return null;
@@ -197,9 +195,9 @@ function calculateSpace(input: HVACInput): HVACResult | null {
     const PEAK_HOUR = 15;
     
     // Hourly data for calculation
-    const peak_temp = CLIMATE_DATA.outdoor_temp_db[PEAK_HOUR]; // 33.6°C
-    const peak_enthalpy_calc = CLIMATE_DATA.outdoor_enthalpy[PEAK_HOUR]; // 93.24 kJ/kg
-    const wb_temp = 28.2; // Display value
+    const peak_temp = CLIMATE_DATA.outdoor_temp_db[PEAK_HOUR];
+    const peak_enthalpy_calc = CLIMATE_DATA.outdoor_enthalpy[PEAK_HOUR];
+    const wb_temp = 28.2; 
 
     // CLTD/SCL Params
     const cltd_wall = CLIMATE_DATA.cltd_wall[defaults.orientation][PEAK_HOUR];
@@ -229,21 +227,35 @@ function calculateSpace(input: HVACInput): HVACResult | null {
     // 4. Equipment
     const Q_equipment = area * defaults.std_equip_density;
 
-    // 5. Fresh Air
-    const fresh_air_rate = 10; // L/s/person1
+    // ------------------------------------------------------------------------
+    // ------------------------------------------------------------------------
+    // [CRITICAL UPDATE v2.1] 5. Fresh Air & Infiltration (Mass Balance)
+    // ------------------------------------------------------------------------
     
-    // [CRITICAL FIX] User override takes precedence over defaults1
-    const requiresFreshAir = input.reqFA !== undefined ? input.reqFA : defaults.reqFA;
-    const requiresExhaust = input.reqEA !== undefined ? input.reqEA : defaults.reqEA;
-    
-    const total_fresh_air_ls = requiresFreshAir ? (people * fresh_air_rate) : 0;
-        const m_fresh_air = total_fresh_air_ls * 1.2 / 1000; // kg/s
+    // 5.1 人員需求 (Base Requirement)
+    const fresh_air_rate = 10; // L/s/person
+    // 使用 any 繞過型別檢查以讀取 reqFA (因為 HVACInput 介面可能未更新)
+    const inputReqFA = (input as any).reqFA;
+    const requiresFreshAir = inputReqFA !== undefined ? inputReqFA : defaults.reqFA;
+    const fa_people_ls = requiresFreshAir ? (people * fresh_air_rate) : 0;
 
-    // Sensible: m * Cp(1.025) * dT
+    // 5.2 排風需求 (Exhaust Requirement)
+    const inputReqEA = (input as any).reqEA;
+    const requiresExhaust = inputReqEA !== undefined ? inputReqEA : defaults.reqEA;
+    // 如果需要排風 (如廚房)，強制 10 ACH
+    const ach = requiresExhaust ? 10 : 0;
+    const exhaust_ls = (volume * ach) / 3.6; // m3/h -> L/s
+
+    // 5.3 質量守恆檢查 (Mass Balance Check)
+    // 規則：取大值。如果排風量 > 人員鮮風，差額視為滲透風，必須計算冷卻它的能量。
+    const effective_fa_ls = Math.max(fa_people_ls, exhaust_ls);
+    
+    const m_fresh_air = effective_fa_ls * 1.2 / 1000; // kg/s
+
+    // Sensible: m * Cp * dT
     const Q_fa_sensible = m_fresh_air * CP_AIR * (peak_temp - INDOOR_TEMP) * 1000;
 
     // Total: m * dH (Enthalpy)
-    // Using hourly enthalpy for calc, but INDOOR_ENTHALPY is fixed at 45.15
     const Q_fa_total = m_fresh_air * (peak_enthalpy_calc - INDOOR_ENTHALPY) * 1000;
 
     // Latent
@@ -268,11 +280,10 @@ function calculateSpace(input: HVACInput): HVACResult | null {
     const required_cooling_hp = required_cooling_kw / 2.5;
     const rounded_hp = Math.ceil(required_cooling_hp * 2) / 2;
 
-    // Air Flow: Q_sensible / (1.224 * 10) * 3.6
-    const required_fa_cmh = (sub_total_sensible / (1.224 * 10)) * 3.6;
-
-    const ach = requiresExhaust ? 10 : 0;
-    const required_ea_cmh = requiresExhaust ? (volume * ach) : 0;
+    // 報告顯示用的數值 (L/s -> CMH)
+    // effective_fa_ls 包含了滲透風，這是冷氣機實際要處理的風量
+    const required_fa_cmh = effective_fa_ls * 3.6; 
+    const required_ea_cmh = exhaust_ls * 3.6;
 
     // ------------------------------------------------------------------------
     // H. Result Construction (DetailedLoad)
@@ -281,19 +292,19 @@ function calculateSpace(input: HVACInput): HVACResult | null {
       design_params: {
         outdoor_temp_db: peak_temp,
         outdoor_temp_wb: wb_temp,
-        outdoor_enthalpy: OUTDOOR_ENTHALPY_MAX, // Display Max value as requested
+        outdoor_enthalpy: OUTDOOR_ENTHALPY_MAX,
         winter_temp: 7.0,
         indoor_temp: INDOOR_TEMP,
         indoor_rh: 55,
         indoor_enthalpy: INDOOR_ENTHALPY,
         fresh_air_rate: fresh_air_rate,
-        exhaust_air_rate: defaults.reqEA ? "10 ACH" : "N/A",
+        exhaust_air_rate: requiresExhaust ? "10 ACH" : "N/A",
         occupancy_density: defaults.std_occ_density,
         lighting_density: defaults.std_light_density,
         equipment_density: defaults.std_equip_density
       },
       load_summary: {
-        peak_hour: PEAK_HOUR + 1, // Display as 16
+        peak_hour: PEAK_HOUR + 1, 
         glass_radiation: {
           sensible: Math.round(Q_glass_radiation), latent: 0, total: Math.round(Q_glass_radiation)
         },
@@ -338,30 +349,23 @@ function calculateSpace(input: HVACInput): HVACResult | null {
           required_hp: parseFloat(required_cooling_hp.toFixed(2)),
           rounded_hp: rounded_hp
         },
-        // ✅ [修正] 不需新風時，所有數據顯示為 0
-        fresh_air: requiresFreshAir ? {
-          number_of_people: people,
-          fresh_air_rate: fresh_air_rate,
-          required_ls: Math.round(total_fresh_air_ls),
-          required_cmh: Math.round(total_fresh_air_ls * 3.6)
-        } : {
-          number_of_people: 0,
-          fresh_air_rate: 0,
-          required_ls: 0,
-          required_cmh: 0
+        fresh_air: {
+            number_of_people: people,
+            fresh_air_rate: fresh_air_rate,
+            required_ls: Math.round(effective_fa_ls),
+            required_cmh: Math.round(effective_fa_ls * 3.6)
         },
         airflow: {
           room_sensible_w: Math.round(sub_total_sensible),
           supply_air_dt: 10,
           air_density_cp: 1.224,
-          required_ls: Math.round(required_fa_cmh / 3.6),
+          required_ls: Math.round(effective_fa_ls),
           required_cmh: Math.round(required_fa_cmh)
         },
-        // ✅ [修正] 不需排風時，顯示 ACH = 0
         exhaust: {
           volume_m3: parseFloat(volume.toFixed(2)),
-          ach: requiresExhaust ? ach : 0,
-          required_cmh: requiresExhaust ? Math.round(required_ea_cmh) : 0
+          ach: ach,
+          required_cmh: Math.round(required_ea_cmh)
         }
       },
       geometry: {
