@@ -291,19 +291,16 @@ function calculateSpace(input: HVACInput): HVACResult | null {
     }
 
     // Sensible Calculation
-    // 只計算那些「來自室外」的補風顯熱負荷
     const Q_fa_sensible = m_fresh_air * CP_AIR * (peak_temp - INDOOR_TEMP) * 1000 * sensible_load_factor;
 
     // Latent & Total Calculation
-    // 潛熱 (Latent) 建議全算 (作為安全係數)，或同樣按比例。這裡我們保持全算潛熱以確保除濕能力。
-    // 算法：先算 100% 室外風的全熱，減去 100% 室外風的顯熱，得到 100% 潛熱。
     const Q_fa_total_raw = m_fresh_air * (peak_enthalpy_calc - INDOOR_ENTHALPY) * 1000;
     const Q_fa_sensible_raw = m_fresh_air * CP_AIR * (peak_temp - INDOOR_TEMP) * 1000;
     const Q_fa_latent_raw = Q_fa_total_raw - Q_fa_sensible_raw;
     
-    const Q_fa_latent = Q_fa_latent_raw; 
+    // [修正] 借風不僅借溫度，也借濕度。潛熱同樣只需處理室外引入的那 30%
+    const Q_fa_latent = Q_fa_latent_raw * sensible_load_factor; 
     
-    // 最終全熱 = 修正後的顯熱 + 原始潛熱
     const Q_fa_total = Q_fa_sensible + Q_fa_latent;
 
     // ------------------------------------------------------------------------
@@ -342,9 +339,9 @@ function calculateSpace(input: HVACInput): HVACResult | null {
         indoor_temp: INDOOR_TEMP,
         indoor_rh: 55,
         indoor_enthalpy: INDOOR_ENTHALPY,
-        // [修正] 如果不需要鮮風，強制回傳 0
         fresh_air_rate: requiresFreshAir ? fresh_air_rate : 0, 
-        exhaust_air_rate: requiresExhaust ? "10 ACH" : "N/A",
+        // [修正] 動態顯示實際使用的 ACH (Kitchen=30, Pantry=6)
+        exhaust_air_rate: requiresExhaust ? `${ach} ACH` : "N/A",
         occupancy_density: defaults.std_occ_density,
         lighting_density: defaults.std_light_density,
         equipment_density: defaults.std_equip_density
