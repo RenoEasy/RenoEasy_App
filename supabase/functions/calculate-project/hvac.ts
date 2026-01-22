@@ -26,6 +26,10 @@ interface RoomDefaults {
   sc_glass: number;
   reqFA: boolean;
   reqEA: boolean;
+  target_ach?: number;       // 自定義換氣次數
+  is_transfer_air?: boolean; // 是否為借風空間
+  transfer_ratio?: number;   // 借風率 (0.0~1.0)，例如 0.7 代表 70% 風量來自鄰室
+
   std_occ_density: number;   // m²/person
   std_light_density: number; // W/m²
   std_equip_density: number; // W/m²
@@ -51,6 +55,12 @@ const ROOM_DEFAULTS: Record<string, RoomDefaults> = {
     label: "Pantry (茶水間)",
     window_ratio: 0.08, wall_ratio: GLOBAL_WALL_RATIO, orientation: GLOBAL_ORIENTATION, has_roof: false,
     u_wall: 2.0, u_glass: 5.6, sc_glass: 0.6, reqFA: false, reqEA: true,
+    
+    // [修改] 6 ACH, 100% 借風 (顯熱負荷=0)
+    target_ach: 6,
+    is_transfer_air: true,
+    transfer_ratio: 1.0,
+    
     std_occ_density: 5, std_light_density: 15, std_equip_density: 50
   },
   "server": {
@@ -81,6 +91,12 @@ const ROOM_DEFAULTS: Record<string, RoomDefaults> = {
     label: "Kitchen (廚房)",
     window_ratio: 0.05, wall_ratio: 0.25, orientation: GLOBAL_ORIENTATION, has_roof: false,
     u_wall: 2.0, u_glass: 5.6, sc_glass: 0.6, reqFA: false, reqEA: true,
+    
+    // [修改] 30 ACH, 70% 借風 (只需冷卻 30% 的補風)
+    target_ach: 30,
+    is_transfer_air: true,
+    transfer_ratio: 0.7, 
+    
     std_occ_density: 10, std_light_density: 15, std_equip_density: 100
   },
   "classroom": {
@@ -111,6 +127,12 @@ const ROOM_DEFAULTS: Record<string, RoomDefaults> = {
     label: "Toilet (廁所)",
     window_ratio: 0.05, wall_ratio: GLOBAL_WALL_RATIO, orientation: GLOBAL_ORIENTATION, has_roof: false,
     u_wall: 2.0, u_glass: 5.6, sc_glass: 0.6, reqFA: false, reqEA: true,
+    
+    // [修改] 10 ACH, 100% 借風
+    target_ach: 10,
+    is_transfer_air: true,
+    transfer_ratio: 1.0,
+    
     std_occ_density: 0, std_light_density: 10, std_equip_density: 0
   }
 };
@@ -228,38 +250,61 @@ function calculateSpace(input: HVACInput): HVACResult | null {
     const Q_equipment = area * defaults.std_equip_density;
 
     // ------------------------------------------------------------------------
-    // ------------------------------------------------------------------------
-    // [CRITICAL UPDATE v2.1] 5. Fresh Air & Infiltration (Mass Balance)
+    // [CRITICAL UPDATE v2.3] 5. Fresh Air & Infiltration (Hybrid Ratio Logic)
     // ------------------------------------------------------------------------
     
-    // 5.1 人員需求 (Base Requirement)
-    const fresh_air_rate = 10; // L/s/person
-    // 使用 any 繞過型別檢查以讀取 reqFA (因為 HVACInput 介面可能未更新)
+    // 5.1 參數獲取
+    // [修改] 優先讀取自定義 target_ach，若無則預設 10 (僅當 reqEA=true)
+    const defaultACH = (defaults.reqEA) ? (defaults.target_ach || 10) : 0;
+    
+    const fresh_air_rate = 10; 
     const inputReqFA = (input as any).reqFA;
     const requiresFreshAir = inputReqFA !== undefined ? inputReqFA : defaults.reqFA;
     const fa_people_ls = requiresFreshAir ? (people * fresh_air_rate) : 0;
 
-    // 5.2 排風需求 (Exhaust Requirement)
+    // 5.2 排風量計算
     const inputReqEA = (input as any).reqEA;
     const requiresExhaust = inputReqEA !== undefined ? inputReqEA : defaults.reqEA;
-    // 如果需要排風 (如廚房)，強制 10 ACH
-    const ach = requiresExhaust ? 10 : 0;
-    const exhaust_ls = (volume * ach) / 3.6; // m3/h -> L/s
+    // [修改] 使用新的 defaultACH (Kitchen=30, Pantry=6, Toilet=10)
+    const ach = requiresExhaust ? defaultACH : 0;
+    const exhaust_ls = (volume * ach) / 3.6; 
 
     // 5.3 質量守恆檢查 (Mass Balance Check)
-    // 規則：取大值。如果排風量 > 人員鮮風，差額視為滲透風，必須計算冷卻它的能量。
+    // 計算物理上必須進入房間的空氣總量
     const effective_fa_ls = Math.max(fa_people_ls, exhaust_ls);
-    
     const m_fresh_air = effective_fa_ls * 1.2 / 1000; // kg/s
 
-    // Sensible: m * Cp * dT
-    const Q_fa_sensible = m_fresh_air * CP_AIR * (peak_temp - INDOOR_TEMP) * 1000;
+    // [核心修改] 借風率計算 (Hybrid Transfer Air)
+    // 邏輯：sensible_load_factor 代表「需要由冷氣機處理的室外空氣比例」
+    // Kitchen: ratio 0.7 (70%借風) -> factor 0.3 (30%室外風需冷卻)
+    // Pantry:  ratio 1.0 (100%借風) -> factor 0.0 (0%室外風需冷卻)
+    
+    let sensible_load_factor = 1.0; // 預設 100% 室外風
 
-    // Total: m * dH (Enthalpy)
-    const Q_fa_total = m_fresh_air * (peak_enthalpy_calc - INDOOR_ENTHALPY) * 1000;
+    if (defaults.is_transfer_air && !requiresFreshAir) {
+        // 如果定義了 transfer_ratio，則使用定義值；否則預設為 1.0 (全借風)
+        const ratio = defaults.transfer_ratio !== undefined ? defaults.transfer_ratio : 1.0;
+        sensible_load_factor = 1.0 - ratio; 
+        
+        // 防呆：確保不小於 0
+        if (sensible_load_factor < 0) sensible_load_factor = 0;
+    }
 
-    // Latent
-    const Q_fa_latent = Q_fa_total - Q_fa_sensible;
+    // Sensible Calculation
+    // 只計算那些「來自室外」的補風顯熱負荷
+    const Q_fa_sensible = m_fresh_air * CP_AIR * (peak_temp - INDOOR_TEMP) * 1000 * sensible_load_factor;
+
+    // Latent & Total Calculation
+    // 潛熱 (Latent) 建議全算 (作為安全係數)，或同樣按比例。這裡我們保持全算潛熱以確保除濕能力。
+    // 算法：先算 100% 室外風的全熱，減去 100% 室外風的顯熱，得到 100% 潛熱。
+    const Q_fa_total_raw = m_fresh_air * (peak_enthalpy_calc - INDOOR_ENTHALPY) * 1000;
+    const Q_fa_sensible_raw = m_fresh_air * CP_AIR * (peak_temp - INDOOR_TEMP) * 1000;
+    const Q_fa_latent_raw = Q_fa_total_raw - Q_fa_sensible_raw;
+    
+    const Q_fa_latent = Q_fa_latent_raw; 
+    
+    // 最終全熱 = 修正後的顯熱 + 原始潛熱
+    const Q_fa_total = Q_fa_sensible + Q_fa_latent;
 
     // ------------------------------------------------------------------------
     // F. Summaries
