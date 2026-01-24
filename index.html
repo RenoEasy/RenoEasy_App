@@ -843,106 +843,101 @@
             if (e.target === this) toggleGuide();
         }); // 
     </script>
-    <footer style="text-align: center; padding: 2rem 1rem; color: #a0aec0; font-size: 0.85rem; border-top: 1px solid #e2e8f0; background: #f8fafc; margin-top: auto;">
-    <div style="margin-bottom: 0.8rem;">
-        <a href="#" onclick="openLegalModal('terms'); return false;" style="color: #4a5568; text-decoration: none; margin: 0 10px; font-weight: 500;">
+    <footer style="text-align: center; padding: 2.5rem 1rem; color: #718096; font-size: 0.85rem; border-top: 1px solid #e2e8f0; background: #f8fafc; margin-top: auto; position: relative; z-index: 10;">
+    <div style="margin-bottom: 1rem; font-family: 'Noto Sans TC', sans-serif;">
+        <a href="#" onclick="openLegalModal('terms'); return false;" style="color: #4a5568; text-decoration: none; margin: 0 12px; font-weight: 500; transition: color 0.2s;">
             服務條款 Terms
         </a> |
-        <a href="#" onclick="openLegalModal('privacy'); return false;" style="color: #4a5568; text-decoration: none; margin: 0 10px; font-weight: 500;">
+        <a href="#" onclick="openLegalModal('privacy'); return false;" style="color: #4a5568; text-decoration: none; margin: 0 12px; font-weight: 500; transition: color 0.2s;">
             隱私政策 Privacy
         </a> |
-        <a href="#" onclick="openLegalModal('refund'); return false;" style="color: #4a5568; text-decoration: none; margin: 0 10px; font-weight: 500;">
-            退款政策 Refund
+        <a href="#" onclick="openLegalModal('refund'); return false;" style="color: #4a5568; text-decoration: none; margin: 0 12px; font-weight: 500; transition: color 0.2s;">
+            退款政策 Refund Policy
         </a>
     </div>
-    <div style="line-height: 1.5;">
+    <div style="line-height: 1.6;">
         &copy; 2026 RenoEasy Calc. All rights reserved.<br>
-        <span style="opacity: 0.8;">Macau SAR | Contact: renoeasycalc@gmail.com</span>
+        <span style="opacity: 0.75; font-size: 0.8rem;">Macau SAR | Professional Engineering Tool</span>
     </div>
 </footer>
 
-<div id="legal-modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 99999; align-items: center; justify-content: center; backdrop-filter: blur(2px);">
-    <div style="background: white; width: 90%; max-width: 700px; max-height: 85vh; border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow: hidden;">
+<div id="legal-modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(26, 32, 44, 0.75); z-index: 99999; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
+    <div style="background: white; width: 92%; max-width: 750px; max-height: 85vh; border-radius: 12px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); display: flex; flex-direction: column; overflow: hidden; animation: modalFadeIn 0.2s ease-out;">
         
-        <div style="padding: 1.2rem 1.5rem; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; background: #f8fafc;">
-            <h3 id="legal-modal-title" style="margin: 0; font-size: 1.2rem; color: #2d3748; font-weight: 700;">Legal Document</h3>
-            <button onclick="closeLegalModal()" style="background: none; border: none; font-size: 1.8rem; line-height: 1; color: #a0aec0; cursor: pointer;">&times;</button>
+        <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; background: #fff;">
+            <h3 id="legal-modal-title" style="margin: 0; font-size: 1.25rem; color: #2d3748; font-weight: 700; font-family: 'Noto Sans TC', sans-serif;">Legal Document</h3>
+            <button onclick="closeLegalModal()" style="background: none; border: none; font-size: 2rem; line-height: 1; color: #a0aec0; cursor: pointer; padding: 0 0.5rem;">&times;</button>
         </div>
 
-        <div id="legal-modal-content" style="padding: 1.5rem; overflow-y: auto; line-height: 1.7; color: #4a5568; font-size: 0.95rem; white-space: pre-wrap;">
+        <div id="legal-modal-content" style="padding: 1.5rem; overflow-y: auto; line-height: 1.8; color: #4a5568; font-size: 0.95rem; white-space: pre-wrap; font-family: 'Noto Sans TC', sans-serif;">
             </div>
 
-        <div style="padding: 1rem 1.5rem; border-top: 1px solid #eee; text-align: right; background: white;">
-            <button onclick="closeLegalModal()" style="background: #2d3748; color: white; border: none; padding: 0.6rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 600;">Close / 關閉</button>
+        <div style="padding: 1rem 1.5rem; border-top: 1px solid #e2e8f0; text-align: right; background: #f7fafc;">
+            <button onclick="closeLegalModal()" style="background: #2d3748; color: white; border: none; padding: 0.75rem 2rem; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.95rem; transition: background 0.2s;">
+                I Understand / 我明白了
+            </button>
         </div>
     </div>
 </div>
 
 <script>
+    // 定義法律條文數據庫 (Bilingual - English Priority for LS Audit)
     const LEGAL_POLICIES = {
         terms: `**TERMS OF SERVICE (服務條款)**
-Last Updated: January 2026
+Last Updated: January 23, 2026
 
-**1. Acceptance of Terms / 接受條款**
-By accessing and using RenoEasy Calc ("the Service"), you agree to be bound by these Terms.
-閣下使用 RenoEasy Calc（下稱「本服務」）即表示同意受本條款約束。
+**1. Nature of Service / 服務性質**
+RenoEasy Calc ("The Service") is a software-as-a-service (SaaS) tool designed to assist engineering professionals in performing preliminary electromechanical calculations.
+RenoEasy Calc（下稱「本服務」）為一款輔助工程專業人員進行初步機電計算的 SaaS 工具。
 
-**2. Nature of Service / 服務性質**
-RenoEasy Calc is a SaaS tool designed to assist engineers in preliminary electromechanical calculations. The generated reports are for **REFERENCE ONLY**.
-本服務為輔助工程師進行初步機電計算的 SaaS 工具。系統生成的報告**僅供參考**。
+**2. PROFESSIONAL DISCLAIMER / 專業免責聲明 (CRITICAL)**
+By using this Service, you explicitly acknowledge and agree that:
+(a) The generated reports are for **REFERENCE ONLY** and do not constitute a formal submission document.
+(b) All outputs MUST be verified, reviewed, and signed by a **Registered Civil/Electrical Engineer** in the Macau SAR (or relevant jurisdiction) before use.
+(c) RenoEasy Calc accepts **NO LIABILITY** for construction errors, safety incidents, or rejection of plans by authorities (DSSCU/CEM/IAM).
+閣下明確同意：
+(a) 本服務生成的報告**僅供參考**，不構成正式入則文件。
+(b) 所有數據在使用前，**必須由澳門註冊工程師覆核及簽署**。
+(c) 本服務不對施工錯誤、安全事故或政府部門（工務局/澳電）退則承擔任何責任。
 
-**3. Professional Disclaimer / 專業免責聲明 (重要)**
-- The Service does NOT constitute a formal engineering submission.
-- All calculations must be verified, reviewed, and signed by a registered professional engineer in Macau before submission to any government authority (DSSCU, CEM, IAM, etc.).
-- We are not liable for any construction errors, submission rejections, or safety incidents resulting from the use of this data.
-- 本服務不構成正式的工程入則文件。
-- 所有計算數據在提交予政府部門（如工務局、澳電、市政署）前，**必須由澳門註冊工程師複核及簽署**。
-- 本公司不對因使用本數據而導致的任何施工錯誤、圖則被拒或安全事故承擔責任。
-
-**4. User Responsibility / 用戶責任**
-You agree to use accurate input data. You acknowledge that software algorithms may have limitations and should not replace professional judgment.
-閣下同意使用準確的輸入數據，並理解軟體算法存在局限性，不應取代專業工程判斷。`,
+**3. Intellectual Property / 知識產權**
+The algorithms, design, and output format are the proprietary property of RenoEasy Calc. Unauthorized reproduction or reverse engineering is prohibited.`,
 
         privacy: `**PRIVACY POLICY (隱私政策)**
-Last Updated: January 2026
+Last Updated: January 23, 2026
 
 **1. Data Collection / 資料收集**
-We collect minimal data: Phone Number & Email (for authentication/delivery), and Project Data (for report generation).
-我們收集最少量的資料：電話及電郵（用於身份驗證及報告傳送），以及專案數據（用於生成報告）。
+We collect minimal data necessary for service operation:
+- **Contact Info:** Phone/Email for account authentication (via Supabase Auth).
+- **Technical Data:** Project inputs (Area, Load types) used to generate reports.
+我們僅收集運作所需的最小數據：電話/電郵（用於身份驗證）及專案輸入數據。
 
-**2. How We Use Data / 資料用途**
-- To authenticate your identity.
-- To generate and deliver PDF reports.
-- 用於驗證閣下身份及傳送 PDF 報告。
+**2. Data Usage & Protection / 數據用途與保護**
+- Your data is processed solely to generate PDF reports and manage your subscription.
+- We utilize industry-standard encryption (SSL) and secure cloud infrastructure (Supabase/Vercel).
+- **We do NOT sell your personal data to third parties.**
+您的數據僅用於生成報告及管理帳戶。我們使用加密技術保護數據，且**絕不**將您的個人資料出售予第三方。
 
-**3. Data Sharing / 資料共享**
-We do NOT sell your personal data to third parties. Data is hosted securely on Supabase/Vercel.
-我們**不會**將閣下的個人資料出售予第三方。數據安全地存儲於 Supabase/Vercel 伺服器。
-
-**4. Contact / 聯絡我們**
-To request data deletion, please contact: renoeasycalc@gmail.com
-如需請求刪除數據，請聯絡上述電郵。`,
+**3. User Rights / 用戶權利**
+You may request the deletion of your account and data at any time by contacting: renoeasycalc@gmail.com.
+閣下可隨時聯絡上述電郵請求刪除帳戶及數據。`,
 
         refund: `**REFUND POLICY (退款政策)**
-Last Updated: January 2026
+Last Updated: January 23, 2026
 
-**1. Digital Goods Policy / 數位產品政策**
-RenoEasy Calc sells digital products (credits for PDF reports). Due to the nature of digital distribution:
+**1. DIGITAL GOODS POLICY / 數位產品政策**
+RenoEasy Calc provides instant access to digital software services and downloadable PDF reports.
+Due to the intangible nature of these goods:
 - **ALL SALES ARE FINAL.**
-- We generally do **NOT** offer refunds once the digital content has been delivered or accessed.
-RenoEasy Calc 銷售數位產品（PDF 報告點數）。基於數位分發的性質：
-- **所有銷售均為最終決定。**
-- 一旦數位內容已發送或被存取，我們原則上**不提供退款**。
+- **NO REFUNDS** will be issued once the service has been accessed or a report generated.
+由於本服務提供即時存取的數位軟體及 PDF 報告，基於數位產品性質：**所有銷售均為最終決定，一旦服務被存取或報告已生成，恕不退款。**
 
-**2. Exceptions / 例外情況**
-Refunds may be considered only if:
-- **Duplicate Payment:** Charged multiple times due to error.
-- **Service Failure:** System failed to generate a report due to server error, unresolved within 72 hours.
-僅在以下情況考慮退款：
-- **重複付款：** 因系統錯誤導致的重複扣款。
-- **服務故障：** 因伺服器錯誤導致無法生成報告，且我們未能在 72 小時內解決。`
+**2. Technical Failures / 技術故障例外**
+Exceptions are made strictly for technical errors where the system fails to deliver the service (e.g., payment charged but no credits added). In such cases, please contact support within 7 days for a full refund or credit restoration.
+僅在系統技術故障（如扣款後未增加點數）的情況下，我們會在核實後提供全額退款或補發點數。`
     };
 
+    // 打開彈窗邏輯
     function openLegalModal(type) {
         const modal = document.getElementById('legal-modal-overlay');
         const title = document.getElementById('legal-modal-title');
@@ -961,24 +956,42 @@ Refunds may be considered only if:
             rawText = LEGAL_POLICIES.refund;
         }
         
-        // 格式化：粗體 + 換行 + 分隔線優化
+        // 渲染內容 (自動將 **文字** 轉為強調樣式)
         content.innerHTML = rawText
-            .replace(/\*\*(.*?)\*\*/g, '<strong style="color:#2d3748; background:#edf2f7; padding:2px 4px; border-radius:4px;">$1</strong>')
+            .replace(/\*\*(.*?)\*\*/g, '<strong style="color:#2d3748; background:#edf2f7; padding:2px 6px; border-radius:4px; font-weight:700;">$1</strong>')
             .replace(/\n/g, '<br>');
             
         modal.style.display = 'flex';
+        // 鎖定背景滾動
         document.body.style.overflow = 'hidden';
     }
 
+    // 關閉彈窗邏輯
     function closeLegalModal() {
         document.getElementById('legal-modal-overlay').style.display = 'none';
         document.body.style.overflow = '';
     }
     
+    // 點擊背景關閉
     document.getElementById('legal-modal-overlay').addEventListener('click', function(e) {
         if (e.target === this) closeLegalModal();
     });
 </script>
+
+<style>
+    /* 簡單的動畫效果 */
+    @keyframes modalFadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* 手機版適配優化 */
+    @media (max-width: 600px) {
+        #legal-modal-content { font-size: 0.85rem !important; }
+        footer div { display: flex; flex-direction: column; gap: 10px; }
+        footer a { display: block; padding: 5px; }
+    }
+</style>
 </script>
 </body>
 </html>
