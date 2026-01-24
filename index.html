@@ -270,6 +270,7 @@
                         </a>
                     </div>
                 </section>
+                
             </main>
         </div>
     </div>
@@ -842,5 +843,133 @@
             if (e.target === this) toggleGuide();
         }); // 
     </script>
+    <footer style="text-align: center; padding: 2rem 1rem; color: #a0aec0; font-size: 0.85rem; border-top: 1px solid #e2e8f0; background: #f8fafc; margin-top: auto;">
+    <div style="margin-bottom: 0.8rem;">
+        <a href="#" onclick="openLegalModal('terms'); return false;" style="color: #4a5568; text-decoration: none; margin: 0 10px; font-weight: 500;">Terms of Service</a> |
+        <a href="#" onclick="openLegalModal('privacy'); return false;" style="color: #4a5568; text-decoration: none; margin: 0 10px; font-weight: 500;">Privacy Policy</a> |
+        <a href="#" onclick="openLegalModal('refund'); return false;" style="color: #4a5568; text-decoration: none; margin: 0 10px; font-weight: 500;">Refund Policy</a>
+    </div>
+    <div style="line-height: 1.5;">
+        &copy; 2026 RenoEasy Calc. All rights reserved.<br>
+        
+    </div>
+</footer>
+
+<div id="legal-modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 99999; align-items: center; justify-content: center; backdrop-filter: blur(2px);">
+    <div style="background: white; width: 90%; max-width: 650px; max-height: 85vh; border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow: hidden;">
+        
+        <div style="padding: 1.2rem 1.5rem; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; background: #f8fafc;">
+            <h3 id="legal-modal-title" style="margin: 0; font-size: 1.2rem; color: #2d3748; font-weight: 700;">Legal Document</h3>
+            <button onclick="closeLegalModal()" style="background: none; border: none; font-size: 1.8rem; line-height: 1; color: #a0aec0; cursor: pointer;">&times;</button>
+        </div>
+
+        <div id="legal-modal-content" style="padding: 1.5rem; overflow-y: auto; line-height: 1.7; color: #4a5568; font-size: 0.95rem; white-space: pre-wrap;">
+            </div>
+
+        <div style="padding: 1rem 1.5rem; border-top: 1px solid #eee; text-align: right; background: white;">
+            <button onclick="closeLegalModal()" style="background: #2d3748; color: white; border: none; padding: 0.6rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 600;">Close</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 這裡放入了完整的英文條款，專門應對支付網關審核
+    const LEGAL_POLICIES = {
+        terms: `**TERMS OF SERVICE**
+Last Updated: January 2026
+
+**1. Acceptance of Terms**
+By accessing and using RenoEasy Calc ("the Service"), you agree to be bound by these Terms. If you do not agree to these terms, please do not use the Service.
+
+**2. Nature of Service**
+RenoEasy Calc is a SaaS tool designed to assist engineers in preliminary electromechanical calculations (Load Schedule, HVAC). The generated reports are for **REFERENCE ONLY**.
+
+**3. Professional Disclaimer (Important)**
+- The Service does NOT constitute a formal engineering submission.
+- All calculations must be verified, reviewed, and signed by a registered professional engineer in Macau (or relevant jurisdiction) before submission to any government authority (DSSCU, CEM, IAM, etc.).
+- We are not liable for any construction errors, submission rejections, or safety incidents resulting from the use of this data.
+
+**4. User Responsibility**
+You agree to use accurate input data. You acknowledge that software algorithms may have limitations and should not replace professional judgment.`,
+
+        privacy: `**PRIVACY POLICY**
+Last Updated: January 2026
+
+**1. Data Collection**
+We collect minimal personal data to provide our service:
+- **Phone Number / Email:** For account authentication and security via Supabase.
+- **Project Data:** Inputs you provide (e.g., room area, device type) are stored to generate your reports.
+
+**2. How We Use Data**
+- To authenticate your identity.
+- To generate and deliver PDF reports.
+- To improve system performance.
+
+**3. Data Sharing**
+We do NOT sell your personal data to third parties. We use trusted infrastructure providers (Supabase, Vercel) to host your data securely.
+
+**4. Cookies**
+We use essential cookies to keep you logged in. By using the site, you verify that you accept our use of cookies.
+
+**5. Contact**
+To request data deletion, please contact: renoeasycalc@gmail.com`,
+
+        refund: `**REFUND POLICY**
+Last Updated: January 2026
+
+**1. Digital Goods Policy**
+RenoEasy Calc sells digital products (credits for PDF report generation) and SaaS access. Due to the nature of digital distribution:
+- **ALL SALES ARE FINAL.**
+- We generally do **NOT** offer refunds once a purchase is made and the digital content (credits/PDF) has been delivered or accessed.
+
+**2. Exceptions**
+Refunds may be considered only under the following specific circumstances:
+- **Duplicate Payment:** You were charged multiple times for a single transaction due to a technical error.
+- **Service Failure:** The system failed to generate a report due to a server-side error, and we could not resolve the issue within 72 hours.
+
+**3. How to Request**
+Please email renoeasycalc@gmail.com with your transaction ID and a description of the issue. We review requests on a case-by-case basis.`
+    };
+
+    function openLegalModal(type) {
+        const modal = document.getElementById('legal-modal-overlay');
+        const title = document.getElementById('legal-modal-title');
+        const content = document.getElementById('legal-modal-content');
+        
+        let rawText = "";
+        
+        if (type === 'terms') {
+            title.innerText = "Terms of Service";
+            rawText = LEGAL_POLICIES.terms;
+        } else if (type === 'privacy') {
+            title.innerText = "Privacy Policy";
+            rawText = LEGAL_POLICIES.privacy;
+        } else if (type === 'refund') {
+            title.innerText = "Refund Policy";
+            rawText = LEGAL_POLICIES.refund;
+        }
+        
+        // 簡單的 Markdown 格式化：將 **文字** 變粗體
+        content.innerHTML = rawText
+            .replace(/\*\*(.*?)\*\*/g, '<strong style="color:#2d3748;">$1</strong>')
+            .replace(/\n/g, '<br>');
+            
+        modal.style.display = 'flex';
+        // 防止背景滾動
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeLegalModal() {
+        document.getElementById('legal-modal-overlay').style.display = 'none';
+        // 恢復背景滾動
+        document.body.style.overflow = '';
+    }
+    
+    // 點擊背景關閉
+    document.getElementById('legal-modal-overlay').addEventListener('click', function(e) {
+        if (e.target === this) closeLegalModal();
+    });
+</script>
+</script>
 </body>
 </html>
