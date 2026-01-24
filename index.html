@@ -750,7 +750,7 @@
     <div class="alert-box" style="background: #f7fafc; border-left-color: #718096; color: #4a5568;">
         <span class="alert-title" style="color: #2d3748;"><i class="fas fa-gavel"></i> 使用條款</span>
         <ol style="padding-left: 20px; margin-top: 10px;">
-            <li style="margin-bottom: 8px;"><strong>非施工圖則：</strong>本系統數據僅屬「工程可行性研究」性質。所有技術參數須經現場實地考察，並由 <strong>澳門註冊機電工程師</strong> 覆核及簽署後，方可用於申報或施工。</li>
+            <li style="margin-bottom: 8px;"><strong>非施工圖則：</strong>本系統數據僅屬「工程可行性研究」性質。所有技術參數須經現場實地考察，並由 <strong>澳門註冊機電工程師</strong> 複核及簽署後，方可用於申報或施工。</li>
             <li style="margin-bottom: 8px;"><strong>用戶責任：</strong>運算準確性依賴用戶輸入。如因遺漏高功率設備或錯誤定義房間用途而導致供電不足，開發團隊不承擔責任。</li>
         </ol>
     </div>
@@ -845,18 +845,24 @@
     </script>
     <footer style="text-align: center; padding: 2rem 1rem; color: #a0aec0; font-size: 0.85rem; border-top: 1px solid #e2e8f0; background: #f8fafc; margin-top: auto;">
     <div style="margin-bottom: 0.8rem;">
-        <a href="#" onclick="openLegalModal('terms'); return false;" style="color: #4a5568; text-decoration: none; margin: 0 10px; font-weight: 500;">Terms of Service</a> |
-        <a href="#" onclick="openLegalModal('privacy'); return false;" style="color: #4a5568; text-decoration: none; margin: 0 10px; font-weight: 500;">Privacy Policy</a> |
-        <a href="#" onclick="openLegalModal('refund'); return false;" style="color: #4a5568; text-decoration: none; margin: 0 10px; font-weight: 500;">Refund Policy</a>
+        <a href="#" onclick="openLegalModal('terms'); return false;" style="color: #4a5568; text-decoration: none; margin: 0 10px; font-weight: 500;">
+            服務條款 Terms
+        </a> |
+        <a href="#" onclick="openLegalModal('privacy'); return false;" style="color: #4a5568; text-decoration: none; margin: 0 10px; font-weight: 500;">
+            隱私政策 Privacy
+        </a> |
+        <a href="#" onclick="openLegalModal('refund'); return false;" style="color: #4a5568; text-decoration: none; margin: 0 10px; font-weight: 500;">
+            退款政策 Refund
+        </a>
     </div>
     <div style="line-height: 1.5;">
         &copy; 2026 RenoEasy Calc. All rights reserved.<br>
-        
+        <span style="opacity: 0.8;">Macau SAR | Contact: renoeasycalc@gmail.com</span>
     </div>
 </footer>
 
 <div id="legal-modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 99999; align-items: center; justify-content: center; backdrop-filter: blur(2px);">
-    <div style="background: white; width: 90%; max-width: 650px; max-height: 85vh; border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow: hidden;">
+    <div style="background: white; width: 90%; max-width: 700px; max-height: 85vh; border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow: hidden;">
         
         <div style="padding: 1.2rem 1.5rem; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; background: #f8fafc;">
             <h3 id="legal-modal-title" style="margin: 0; font-size: 1.2rem; color: #2d3748; font-weight: 700;">Legal Document</h3>
@@ -867,68 +873,74 @@
             </div>
 
         <div style="padding: 1rem 1.5rem; border-top: 1px solid #eee; text-align: right; background: white;">
-            <button onclick="closeLegalModal()" style="background: #2d3748; color: white; border: none; padding: 0.6rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 600;">Close</button>
+            <button onclick="closeLegalModal()" style="background: #2d3748; color: white; border: none; padding: 0.6rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 600;">Close / 關閉</button>
         </div>
     </div>
 </div>
 
 <script>
-    // 這裡放入了完整的英文條款，專門應對支付網關審核
     const LEGAL_POLICIES = {
-        terms: `**TERMS OF SERVICE**
+        terms: `**TERMS OF SERVICE (服務條款)**
 Last Updated: January 2026
 
-**1. Acceptance of Terms**
-By accessing and using RenoEasy Calc ("the Service"), you agree to be bound by these Terms. If you do not agree to these terms, please do not use the Service.
+**1. Acceptance of Terms / 接受條款**
+By accessing and using RenoEasy Calc ("the Service"), you agree to be bound by these Terms.
+閣下使用 RenoEasy Calc（下稱「本服務」）即表示同意受本條款約束。
 
-**2. Nature of Service**
-RenoEasy Calc is a SaaS tool designed to assist engineers in preliminary electromechanical calculations (Load Schedule, HVAC). The generated reports are for **REFERENCE ONLY**.
+**2. Nature of Service / 服務性質**
+RenoEasy Calc is a SaaS tool designed to assist engineers in preliminary electromechanical calculations. The generated reports are for **REFERENCE ONLY**.
+本服務為輔助工程師進行初步機電計算的 SaaS 工具。系統生成的報告**僅供參考**。
 
-**3. Professional Disclaimer (Important)**
+**3. Professional Disclaimer / 專業免責聲明 (重要)**
 - The Service does NOT constitute a formal engineering submission.
-- All calculations must be verified, reviewed, and signed by a registered professional engineer in Macau (or relevant jurisdiction) before submission to any government authority (DSSCU, CEM, IAM, etc.).
+- All calculations must be verified, reviewed, and signed by a registered professional engineer in Macau before submission to any government authority (DSSCU, CEM, IAM, etc.).
 - We are not liable for any construction errors, submission rejections, or safety incidents resulting from the use of this data.
+- 本服務不構成正式的工程入則文件。
+- 所有計算數據在提交予政府部門（如工務局、澳電、市政署）前，**必須由澳門註冊工程師複核及簽署**。
+- 本公司不對因使用本數據而導致的任何施工錯誤、圖則被拒或安全事故承擔責任。
 
-**4. User Responsibility**
-You agree to use accurate input data. You acknowledge that software algorithms may have limitations and should not replace professional judgment.`,
+**4. User Responsibility / 用戶責任**
+You agree to use accurate input data. You acknowledge that software algorithms may have limitations and should not replace professional judgment.
+閣下同意使用準確的輸入數據，並理解軟體算法存在局限性，不應取代專業工程判斷。`,
 
-        privacy: `**PRIVACY POLICY**
+        privacy: `**PRIVACY POLICY (隱私政策)**
 Last Updated: January 2026
 
-**1. Data Collection**
-We collect minimal personal data to provide our service:
-- **Phone Number / Email:** For account authentication and security via Supabase.
-- **Project Data:** Inputs you provide (e.g., room area, device type) are stored to generate your reports.
+**1. Data Collection / 資料收集**
+We collect minimal data: Phone Number & Email (for authentication/delivery), and Project Data (for report generation).
+我們收集最少量的資料：電話及電郵（用於身份驗證及報告傳送），以及專案數據（用於生成報告）。
 
-**2. How We Use Data**
+**2. How We Use Data / 資料用途**
 - To authenticate your identity.
 - To generate and deliver PDF reports.
-- To improve system performance.
+- 用於驗證閣下身份及傳送 PDF 報告。
 
-**3. Data Sharing**
-We do NOT sell your personal data to third parties. We use trusted infrastructure providers (Supabase, Vercel) to host your data securely.
+**3. Data Sharing / 資料共享**
+We do NOT sell your personal data to third parties. Data is hosted securely on Supabase/Vercel.
+我們**不會**將閣下的個人資料出售予第三方。數據安全地存儲於 Supabase/Vercel 伺服器。
 
-**4. Cookies**
-We use essential cookies to keep you logged in. By using the site, you verify that you accept our use of cookies.
+**4. Contact / 聯絡我們**
+To request data deletion, please contact: renoeasycalc@gmail.com
+如需請求刪除數據，請聯絡上述電郵。`,
 
-**5. Contact**
-To request data deletion, please contact: renoeasycalc@gmail.com`,
-
-        refund: `**REFUND POLICY**
+        refund: `**REFUND POLICY (退款政策)**
 Last Updated: January 2026
 
-**1. Digital Goods Policy**
-RenoEasy Calc sells digital products (credits for PDF report generation) and SaaS access. Due to the nature of digital distribution:
+**1. Digital Goods Policy / 數位產品政策**
+RenoEasy Calc sells digital products (credits for PDF reports). Due to the nature of digital distribution:
 - **ALL SALES ARE FINAL.**
-- We generally do **NOT** offer refunds once a purchase is made and the digital content (credits/PDF) has been delivered or accessed.
+- We generally do **NOT** offer refunds once the digital content has been delivered or accessed.
+RenoEasy Calc 銷售數位產品（PDF 報告點數）。基於數位分發的性質：
+- **所有銷售均為最終決定。**
+- 一旦數位內容已發送或被存取，我們原則上**不提供退款**。
 
-**2. Exceptions**
-Refunds may be considered only under the following specific circumstances:
-- **Duplicate Payment:** You were charged multiple times for a single transaction due to a technical error.
-- **Service Failure:** The system failed to generate a report due to a server-side error, and we could not resolve the issue within 72 hours.
-
-**3. How to Request**
-Please email renoeasycalc@gmail.com with your transaction ID and a description of the issue. We review requests on a case-by-case basis.`
+**2. Exceptions / 例外情況**
+Refunds may be considered only if:
+- **Duplicate Payment:** Charged multiple times due to error.
+- **Service Failure:** System failed to generate a report due to server error, unresolved within 72 hours.
+僅在以下情況考慮退款：
+- **重複付款：** 因系統錯誤導致的重複扣款。
+- **服務故障：** 因伺服器錯誤導致無法生成報告，且我們未能在 72 小時內解決。`
     };
 
     function openLegalModal(type) {
@@ -939,33 +951,30 @@ Please email renoeasycalc@gmail.com with your transaction ID and a description o
         let rawText = "";
         
         if (type === 'terms') {
-            title.innerText = "Terms of Service";
+            title.innerText = "Terms of Service / 服務條款";
             rawText = LEGAL_POLICIES.terms;
         } else if (type === 'privacy') {
-            title.innerText = "Privacy Policy";
+            title.innerText = "Privacy Policy / 隱私政策";
             rawText = LEGAL_POLICIES.privacy;
         } else if (type === 'refund') {
-            title.innerText = "Refund Policy";
+            title.innerText = "Refund Policy / 退款政策";
             rawText = LEGAL_POLICIES.refund;
         }
         
-        // 簡單的 Markdown 格式化：將 **文字** 變粗體
+        // 格式化：粗體 + 換行 + 分隔線優化
         content.innerHTML = rawText
-            .replace(/\*\*(.*?)\*\*/g, '<strong style="color:#2d3748;">$1</strong>')
+            .replace(/\*\*(.*?)\*\*/g, '<strong style="color:#2d3748; background:#edf2f7; padding:2px 4px; border-radius:4px;">$1</strong>')
             .replace(/\n/g, '<br>');
             
         modal.style.display = 'flex';
-        // 防止背景滾動
         document.body.style.overflow = 'hidden';
     }
 
     function closeLegalModal() {
         document.getElementById('legal-modal-overlay').style.display = 'none';
-        // 恢復背景滾動
         document.body.style.overflow = '';
     }
     
-    // 點擊背景關閉
     document.getElementById('legal-modal-overlay').addEventListener('click', function(e) {
         if (e.target === this) closeLegalModal();
     });
