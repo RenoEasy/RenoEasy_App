@@ -1816,6 +1816,55 @@ body {
     box-shadow: 0 4px 12px rgba(0, 51, 153, 0.1);
     border-color: var(--primary-color);
 }
+/* =========================================
+   [新增] 內部導航欄 - 設計指引按鈕 (Engineering Amber)
+   ========================================= */
+.btn-nav-guide {
+    background: #fffaf0;       /* 淺橙色背景 */
+    color: #c05621;            /* 深橙色文字 */
+    border: 1px solid #fbd38d; /* 橙色邊框 */
+    padding: 6px 16px;
+    border-radius: 50px;       /* 圓角 */
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    height: 36px;              /* 固定高度，與 User Pill 對齊 */
+    margin-right: 8px;         /* 與右邊的點數按鈕保持距離 */
+}
+
+/* 滑鼠懸停效果 */
+.btn-nav-guide:hover {
+    background: #feebc8;
+    color: #9c4221;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(237, 137, 54, 0.2);
+}
+
+.btn-nav-guide i {
+    font-size: 1rem;
+}
+
+/* 手機版適配：只顯示圖標，隱藏文字 */
+@media (max-width: 768px) {
+    .btn-nav-guide {
+        padding: 6px 10px;
+        background: transparent;
+        border: none;
+    }
+    
+    .btn-nav-guide .btn-text {
+        display: none; 
+    }
+    
+    .btn-nav-guide i {
+        font-size: 1.2rem;
+        color: #ed8936;
+    }
+}
 
 /* ==================== Custom Modal (修復版) ==================== */
 
